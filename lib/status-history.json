@@ -1,0 +1,1 @@
+{"entries":[],"note":"Public status history for the I-15 corridor segments, written by scripts/log-status.mjs. The logger appends a dated entry whenever a segment's status signature changes; the first run with the NDOT key records the baseline. Empty until the key lands and the runner is scheduled at launch."}

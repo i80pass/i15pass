@@ -1,0 +1,26 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci --legacy-peer-deps || npm install --legacy-peer-deps
+    build:
+      commands:
+        # Amplify exposes console environment variables to the build container,
+        # but not reliably to the SSR runtime that executes route handlers.
+        # Writing them here puts them where Next.js loads them at server start.
+        # `|| true` so the build still succeeds when the variable is unset.
+        # Wasatch lesson (Nov 4, 2026): also set NDOT_API_KEY at BOTH app level
+        # and branch level in the console; app level alone did not reach the
+        # runtime there.
+        - env | grep -e NDOT_API_KEY >> .env.production || true
+        - env | grep -e NEXT_PUBLIC_GA_ID >> .env.production || true
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - '**/*'
+  cache:
+    paths:
+      - node_modules/**/*
+      - .next/cache/**/*

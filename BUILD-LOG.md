@@ -90,3 +90,11 @@ Camera grid rule compliance: grid-cols-1, sm:grid-cols-2, md:grid-cols-3, gap-4,
 ## What is NOT done (deploy chain, all browser or account steps)
 
 The code is complete and verified locally. It is not deployed. The remaining steps need the signed in browser session or Tracy, and are batched in the completion report: NDOT developer signup and key, GitHub repo creation, Amplify app creation and env vars, domain association and Cloudflare DNS, contact email routing, Search Console and GA4, the snapshot refresh after the key lands, the hourly status logger scheduling, and the rendered tablet width QA after the first deploy.
+
+## API usage discipline pass (Nov 5, 2026)
+Per the Gold Standard standing API usage discipline (Phase 2, added Nov 5 after the UDOT usage limit notice; IBI 511 throttle is 10 calls per 60 seconds per key, recorded here before launch):
+- lib/ndot.js now enforces a 300 second cache floor on every list resource (roadconditions, weatherstations, event, alerts), up from 120 on three of them.
+- Module level cache with in flight dedupe added: concurrent renders share one outbound request per resource; negative results are cached for the window.
+- Fallback chains removed: events read only /api/v2/get/event and alerts only /api/v2/get/alerts. No second endpoint fires on an empty or error result.
+- Camera inventory is snapshot only in the data layer; the previous live cameras call during renders is gone. The snapshot script is the only inventory caller.
+- scripts/log-status.mjs already complied (one call per resource, single hourly caller) and is unchanged. No test calls have been made on the NDOT key (it is still Pending Approval at NDOT).

@@ -45,6 +45,7 @@ export default function Footer() {
             <li><Link href="/for-media" className="hover:text-white">For news and radio</Link></li>
             <li><Link href="/about" className="hover:text-white">About</Link></li>
             <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
+            <li><Link href="/site-map" className="hover:text-white">Sitemap</Link></li>
             <li><a href={SITE.networkUrl} className="hover:text-white">{SITE.networkLabel}</a></li>
           </ul>
         </nav>

@@ -4,6 +4,7 @@ import JsonLd from "@/components/JsonLd";
 import { SITE } from "@/lib/site-config";
 import { CORRIDORS } from "@/lib/corridors";
 import { getCorridorCameras } from "@/lib/ndot";
+import { displayCameras } from "@/lib/sample-cameras";
 import { webPageSchema } from "@/lib/schema";
 
 export const revalidate = 3600;
@@ -16,6 +17,7 @@ export const metadata = {
 
 export default async function CamerasIndex() {
   const sets = await Promise.all(CORRIDORS.map((c) => getCorridorCameras(c)));
+  const displaySets = CORRIDORS.map((c, i) => displayCameras(c, sets[i]));
   const total = sets.flat().reduce((n, cam) => n + cam.views.length, 0);
   return (
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
@@ -24,7 +26,7 @@ export default async function CamerasIndex() {
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
         {total > 0
           ? `${total} Nevada 511 camera views across the corridor, grouped by stretch and sequenced in driving order inside each strip.`
-          : "Nevada 511 cameras for every stretch of this corridor will list here the moment the live feed is connected, grouped by stretch and sequenced in driving order."}{" "}
+          : "Nevada 511 cameras for every stretch of this corridor will list here the moment the live feed is connected, grouped by stretch and sequenced in driving order. Until then, each stretch below shows labeled sample stills for its real camera locations."}{" "}
         The Las Vegas valley set is the doorstep check, Primm shows you the California line before you commit to the
         desert, and the Mesquite set ends at the mouth of the Virgin River Gorge, the one stretch with no cameras of
         its own. For the Boulevard itself, the Strip camera tour walks the cameras on Las Vegas Boulevard.
@@ -36,7 +38,7 @@ export default async function CamerasIndex() {
             <h2 className="text-xl font-bold text-on-surface">{c.routeLabel} {c.name}</h2>
             <Link href={`/${c.slug}-cameras`} className="text-sm font-bold text-primary">Driving order strip</Link>
           </div>
-          <CameraGrid cameras={sets[i].slice(0, 6)} />
+          <CameraGrid cameras={displaySets[i].slice(0, 6)} />
         </section>
       ))}
     </main>

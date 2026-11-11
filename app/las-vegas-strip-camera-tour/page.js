@@ -2,6 +2,7 @@ import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import { SITE } from "@/lib/site-config";
 import { getStripCameras } from "@/lib/ndot";
+import { SAMPLE_STRIP_CAMERAS } from "@/lib/sample-cameras";
 import { webPageSchema, cameraListSchema } from "@/lib/schema";
 
 export const revalidate = 300;
@@ -43,7 +44,9 @@ const STOPS = [
 ];
 
 export default async function StripTourPage() {
-  const cameras = await getStripCameras();
+  const realCameras = await getStripCameras();
+  const usingSamples = realCameras.length === 0;
+  const cameras = usingSamples ? SAMPLE_STRIP_CAMERAS : realCameras;
   const flat = cameras.flatMap((cam) => cam.views.map((v) => ({ cam, v })));
   // Cameras distributed across the stops in boulevard order.
   const perStop = STOPS.map((_, i) => {
@@ -55,7 +58,7 @@ export default async function StripTourPage() {
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
       <JsonLd data={[
         webPageSchema({ path: "/las-vegas-strip-camera-tour", title: metadata.title, description: metadata.description }),
-        cameraListSchema(cameras, "Las Vegas Strip"),
+        cameraListSchema(realCameras, "Las Vegas Strip"),
       ]} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">The Strip, by camera</h1>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
@@ -66,10 +69,11 @@ export default async function StripTourPage() {
       </p>
       <p className="text-sm text-secondary mt-2">{SITE.dataCredit}. Stills load as you scroll; nothing on this page plays video.</p>
 
-      {flat.length === 0 && (
+      {usingSamples && (
         <div className="glass-card rounded-2xl p-4 text-sm text-secondary leading-relaxed mt-8">
-          The Boulevard cameras join this tour the moment the Nevada 511 feed is connected. The walk itself is
-          written below so the route is ready; each stop takes its live frames in boulevard order as they arrive.
+          The Boulevard frames on this tour are labeled sample stills for the stops' real camera locations,
+          shown until the Nevada 511 feed is connected. Live frames replace them automatically once the feed
+          lands, in the same boulevard order.
         </div>
       )}
 
@@ -81,16 +85,30 @@ export default async function StripTourPage() {
             <p className="text-sm md:text-base text-secondary leading-relaxed max-w-3xl mt-3">{stop.body}</p>
             {perStop[i].length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
-                {perStop[i].slice(0, 3).map(({ cam, v }) => (
-                  <Link key={v.id} href={`/camera/${v.id}`} className="glass-card rounded-2xl overflow-hidden block aura-shadow-hover">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={v.url} alt={`${cam.location} live still`} loading="lazy" width="320" height="240" className="w-full aspect-[4/3] object-cover bg-surface-container" />
-                    <p className="p-3">
-                      <span className="block text-sm font-bold text-on-surface leading-snug">{cam.location}</span>
-                      <span className="block text-xs text-secondary mt-0.5">{cam.roadway}{cam.direction ? ` | ${cam.direction}` : ""}</span>
-                    </p>
-                  </Link>
-                ))}
+                {perStop[i].slice(0, 3).map(({ cam, v }) =>
+                  cam.sample ? (
+                    <div key={v.id} className="glass-card rounded-2xl overflow-hidden block">
+                      <div className="relative">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={v.url} alt={`Sample still (mockup) of ${cam.location}`} loading="lazy" width="320" height="240" className="w-full aspect-[4/3] object-cover bg-surface-container" />
+                        <span className="absolute left-2 bottom-2 bg-white/90 text-amber-900 border border-dashed border-amber-700 rounded px-1.5 py-0.5 text-[10px] font-bold tracking-[0.14em] uppercase">Mockup</span>
+                      </div>
+                      <p className="p-3">
+                        <span className="block text-sm font-bold text-on-surface leading-snug">{cam.location}</span>
+                        <span className="block text-xs text-secondary mt-0.5">{cam.roadway}{cam.direction ? ` | ${cam.direction}` : ""} | Sample still</span>
+                      </p>
+                    </div>
+                  ) : (
+                    <Link key={v.id} href={`/camera/${v.id}`} className="glass-card rounded-2xl overflow-hidden block aura-shadow-hover">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={v.url} alt={`${cam.location} live still`} loading="lazy" width="320" height="240" className="w-full aspect-[4/3] object-cover bg-surface-container" />
+                      <p className="p-3">
+                        <span className="block text-sm font-bold text-on-surface leading-snug">{cam.location}</span>
+                        <span className="block text-xs text-secondary mt-0.5">{cam.roadway}{cam.direction ? ` | ${cam.direction}` : ""}</span>
+                      </p>
+                    </Link>
+                  )
+                )}
               </div>
             )}
           </section>

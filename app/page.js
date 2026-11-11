@@ -9,6 +9,7 @@ import { TOWNS } from "@/lib/towns";
 import { ROUTES } from "@/lib/routes-data";
 import { getCorridorStatus, getCorridorCameras } from "@/lib/ndot";
 import { webPageSchema, webSiteSchema, faqSchema, roadConditionSchema } from "@/lib/schema";
+import { displayCameras } from "@/lib/sample-cameras";
 
 export const revalidate = 120;
 
@@ -21,7 +22,7 @@ const HOME_FAQS = [
   { q: "Is I-15 open right now?", a: "Each stretch of the corridor has its own live verdict at the top of this page, read from Nevada 511: Las Vegas, the run to Primm, the Mountain Pass approach, and Mesquite toward the Gorge. If a stretch is closed, its verdict says so plainly, with the NDOT posting behind it." },
   { q: "Do I need chains on I-15 today?", a: "Only where a posting says so. Nevada posts chain and snow tire requirements situationally rather than by a numbered ladder, and on this corridor the winter posting that matters is Mountain Pass, on the California side. The verdicts above carry any live posting in NDOT's own words, and the Nevada chain and wind rules page explains what the posted language requires." },
   { q: "Where do the cameras and conditions come from?", a: "Nevada 511, the Nevada Department of Transportation's traveler information service. Camera stills are NDOT's own, loaded live from the NDOT service, and NDOT is credited on every page. This site is not an official NDOT site." },
-  { q: "What is the worst drive on this corridor?", a: "Friday afternoon southbound into California and Sunday afternoon northbound into Las Vegas are the corridor's famous queues, stacking from Primm toward Jean. The Las Vegas to Los Angeles page tracks that drive with live verdicts for every stretch it crosses." },
+  { q: "What is the worst drive on this corridor?", a: "The Sunday afternoon drive southbound out of Las Vegas toward California is the corridor's famous queue, stacking back from the state line through Primm toward Jean, with Friday afternoon northbound into Las Vegas as the busy runner up. The Las Vegas to Los Angeles page tracks that drive with live verdicts for every stretch it crosses." },
 ];
 
 export default async function HomePage() {
@@ -59,8 +60,10 @@ export default async function HomePage() {
           <h2 className="text-xl md:text-2xl font-bold text-on-surface">Las Vegas cameras</h2>
           <Link href="/las-vegas-cameras" className="text-sm font-bold text-primary">All Las Vegas cameras</Link>
         </div>
-        <CameraGrid cameras={vegasCameras.slice(0, 6)} />
-        <p className="text-xs text-secondary mt-2">{SITE.dataCreditShort}. Stills refresh about every minute at the source.</p>
+        <CameraGrid cameras={displayCameras(CORRIDORS[0], vegasCameras).slice(0, 6)} />
+        {vegasCameras.length > 0 && (
+          <p className="text-xs text-secondary mt-2">{SITE.dataCreditShort}. Stills refresh about every minute at the source.</p>
+        )}
       </section>
 
       <section className="mt-12 glass-card rounded-2xl p-4 md:p-5">

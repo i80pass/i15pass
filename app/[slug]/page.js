@@ -5,6 +5,7 @@ import CameraGrid from "@/components/CameraGrid";
 import FaqBlock from "@/components/FaqBlock";
 import EditorialSections from "@/components/EditorialSections";
 import JsonLd from "@/components/JsonLd";
+import StatelineBoard from "@/components/StatelineBoard";
 import { SITE } from "@/lib/site-config";
 import { CORRIDORS, statusCorridor } from "@/lib/corridors";
 import { TOWNS, getTown } from "@/lib/towns";
@@ -13,6 +14,8 @@ import { COMPARES, getCompare } from "@/lib/compare";
 import { getCorridorStatus, getCorridorCameras, getWeatherStations, corridorStations, parseF, cleanEvent } from "@/lib/ndot";
 import { getTownWeather, getWeatherAlerts, getPointWeather, getPointAlerts } from "@/lib/weather";
 import { webPageSchema, faqSchema, roadConditionSchema, cameraListSchema, placeSchema, breadcrumbSchema } from "@/lib/schema";
+import { displayCameras } from "@/lib/sample-cameras";
+import { STATELINE_FAQS } from "@/lib/stateline-faqs";
 
 export const revalidate = 120;
 export const dynamicParams = false;
@@ -199,7 +202,68 @@ async function SummitWeather({ corridor }) {
   );
 }
 
+// The Primm and State Line page is the Stateline backup module: the
+// approved reader board design, with the corridor's live NDOT layer and
+// editorial sections below it. The module carries its own FAQ (schema
+// from lib/stateline-faqs.js, the same questions it renders), so the
+// corridor FaqBlock is not repeated here.
+async function PrimmPage({ corridor }) {
+  const eff = statusCorridor(corridor);
+  const [status, stations] = await Promise.all([
+    getCorridorStatus(eff),
+    getWeatherStations(),
+  ]);
+  const myStations = corridorStations(stations, eff);
+  return (
+    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
+      <JsonLd data={[
+        webPageSchema({ path: `/${corridor.slug}`, title: `${corridor.name} Road Conditions`, description: corridor.intro[0] }),
+        roadConditionSchema(corridor, status),
+        faqSchema(STATELINE_FAQS),
+        breadcrumbSchema([{ name: "Home", path: "/" }, { name: corridor.name, path: `/${corridor.slug}` }]),
+      ]} />
+      <StatelineBoard />
+      <section className="mt-10">
+        <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">What Nevada 511 is posting on this stretch</h2>
+        <StatusBanner corridor={corridor} status={status} heading={`${corridor.name} right now`} />
+      </section>
+      <SegmentsList segments={status.segments} />
+      <StationTable stations={myStations} />
+      <EventList events={status.events} />
+
+      <section className="mt-10">
+        <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Corridor checkpoints</h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          {corridor.checkpoints.map((cp) => (
+            <div key={cp.name} className="glass-card rounded-2xl p-4">
+              <p className="font-bold text-on-surface text-sm">{cp.name}</p>
+              <p className="text-sm text-secondary leading-relaxed mt-1">{cp.note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <EditorialSections sections={corridor.sections} />
+
+      <section className="mt-10 glass-card rounded-2xl p-4 md:p-5">
+        <h2 className="text-headline-sm text-on-surface mb-2">Towns on this stretch</h2>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {corridor.towns.map((slug) => {
+            const t = getTown(slug);
+            return t ? (
+              <Link key={slug} href={`/${slug}-weather`} className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">{t.name} weather</Link>
+            ) : null;
+          })}
+          <Link href="/las-vegas-to-los-angeles" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Las Vegas to Los Angeles</Link>
+          <Link href="/status-history" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Status history</Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
 async function CorridorPage({ corridor }) {
+  if (corridor.slug === "primm-state-line") return <PrimmPage corridor={corridor} />;
   const eff = statusCorridor(corridor);
   const [status, cameras, stations] = await Promise.all([
     getCorridorStatus(eff),
@@ -230,7 +294,7 @@ async function CorridorPage({ corridor }) {
           <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
           <Link href={`/${corridor.slug}-cameras`} className="text-sm font-bold text-primary">Full camera strip</Link>
         </div>
-        <CameraGrid cameras={cameras.slice(0, 6)} />
+        <CameraGrid cameras={displayCameras(corridor, cameras).slice(0, 6)} />
       </section>
 
       <SegmentsList segments={status.segments} />
@@ -275,6 +339,7 @@ async function CorridorPage({ corridor }) {
 
 async function StripPage({ corridor }) {
   const cameras = await getCorridorCameras(corridor);
+  const display = displayCameras(corridor, cameras);
   return (
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
       <JsonLd data={[
@@ -290,7 +355,7 @@ async function StripPage({ corridor }) {
       </p>
       <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
       <div className="mt-6">
-        <CameraGrid cameras={cameras} />
+        <CameraGrid cameras={display} />
       </div>
       <p className="mt-8 text-sm">
         <Link href={`/${corridor.slug}`} className="font-bold text-primary">Back to {corridor.name} conditions</Link>
@@ -386,16 +451,21 @@ async function RoutePage({ route }) {
   const corridors = CORRIDORS.filter((c) => route.corridors.includes(c.slug));
   const statuses = await Promise.all(corridors.map((c) => getCorridorStatus(statusCorridor(c))));
   const camSets = await Promise.all(corridors.map((c) => getCorridorCameras(c)));
-  const cameras = camSets.flat().slice(0, 9);
+  const cameras = corridors.flatMap((c, i) => displayCameras(c, camSets[i])).slice(0, 9);
   return (
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
       <JsonLd data={[
         webPageSchema({ path: `/${route.slug}`, title: route.name, description: route.intro }),
-        faqSchema(route.faqs),
+        faqSchema(route.slug === "las-vegas-to-los-angeles" ? [...route.faqs, ...STATELINE_FAQS] : route.faqs),
       ]} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{route.name}</h1>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{route.intro}</p>
       <p className="text-sm text-secondary mt-2">{route.miles} miles | {route.driveTime} | {SITE.dataCreditShort}</p>
+      {route.slug === "las-vegas-to-los-angeles" && (
+        <div className="mt-6">
+          <StatelineBoard embedded />
+        </div>
+      )}
       <div className="grid gap-4 mt-6">
         {corridors.map((c, i) => (
           <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />

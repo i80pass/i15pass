@@ -419,7 +419,7 @@ async function TownPage({ town }) {
 
       <div className="grid gap-4 mt-6">
         {corridors.map((c, i) => (
-          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
         ))}
       </div>
 
@@ -468,7 +468,7 @@ async function RoutePage({ route }) {
       )}
       <div className="grid gap-4 mt-6">
         {corridors.map((c, i) => (
-          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
         ))}
       </div>
       <section className="mt-9">
@@ -502,7 +502,7 @@ async function ComparePage({ compare }) {
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{compare.intro}</p>
       <div className="grid gap-4 mt-7">
         {corridors.map((c, i) => (
-          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
         ))}
       </div>
       <section className="mt-9">

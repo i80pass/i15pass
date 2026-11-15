@@ -1,0 +1,139 @@
+{
+  "generatedAt": "2026-11-15T08:55:09.722Z",
+  "source": "Caltrans District 8 CCTV (cwwp2.dot.ca.gov), snapshot for the Cajon Pass corridor box",
+  "cameras": [
+    {
+      "index": "1447",
+      "name": "I-15 : (596) Main St",
+      "lat": 34.426603,
+      "lon": -117.379826,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15596mainst/i15596mainst.jpg"
+    },
+    {
+      "index": "380",
+      "name": "I-15 : (380) US-395",
+      "lat": 34.39761,
+      "lon": -117.40228,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15380us395/i15380us395.jpg"
+    },
+    {
+      "index": "594",
+      "name": "I-15 : (594) Ranchero Road Loop (s/o Route 395",
+      "lat": 34.38321,
+      "lon": -117.41592,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15594rancheroroadloopsoroute395/i15594rancheroroadloopsoroute395.jpg"
+    },
+    {
+      "index": "593",
+      "name": "I-15 : (593) at Oak Hill Rd",
+      "lat": 34.36317,
+      "lon": -117.43209,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15593atoakhillrd/i15593atoakhillrd.jpg"
+    },
+    {
+      "index": "666",
+      "name": "I-15 : (666) Brake Check Rd",
+      "lat": 34.34591,
+      "lon": -117.46561,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15666brakecheckrd/i15666brakecheckrd.jpg"
+    },
+    {
+      "index": "592",
+      "name": "I-15 : (592) Forest Serv As",
+      "lat": 34.34375,
+      "lon": -117.44897,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15592forestservas/i15592forestservas.jpg"
+    },
+    {
+      "index": "665",
+      "name": "I-15 : (665) Truck RunwayRp",
+      "lat": 34.336778,
+      "lon": -117.482731,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15665truckrunwayrp/i15665truckrunwayrp.jpg"
+    },
+    {
+      "index": "591",
+      "name": "I-15 : (591) n/o Route 138",
+      "lat": 34.33615,
+      "lon": -117.48066,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15591noroute138/i15591noroute138.jpg"
+    },
+    {
+      "index": "1129",
+      "name": "I-15 : (129) 0.3 MI N/O RTE 138",
+      "lat": 34.315079,
+      "lon": -117.479045,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i1512903minorte138/i1512903minorte138.jpg"
+    },
+    {
+      "index": "590",
+      "name": "I-15 : (590) Jct. 138",
+      "lat": 34.31279,
+      "lon": -117.47553,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15590jct138/i15590jct138.jpg"
+    },
+    {
+      "index": "589",
+      "name": "I-15 : (589) s/o Cleghorn Rd",
+      "lat": 34.28992,
+      "lon": -117.45179,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15589socleghornrd/i15589socleghornrd.jpg"
+    },
+    {
+      "index": "588",
+      "name": "I-15 : (588) Oakie Flats Road",
+      "lat": 34.263559,
+      "lon": -117.449426,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15588oakieflatsroad/i15588oakieflatsroad.jpg"
+    },
+    {
+      "index": "222",
+      "name": "I-15 : (222) 1.25mi Kenwood",
+      "lat": 34.24872,
+      "lon": -117.44142,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15222125mikenwood/i15222125mikenwood.jpg"
+    },
+    {
+      "index": "221",
+      "name": "I-15 : (221) 0.5mi n/o Kenwood",
+      "lat": 34.24171,
+      "lon": -117.4325,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i1522105minokenwood/i1522105minokenwood.jpg"
+    },
+    {
+      "index": "220",
+      "name": "I-15 : (220) NB Kenwood On",
+      "lat": 34.23787,
+      "lon": -117.4251,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15220nbkenwoodon/i15220nbkenwoodon.jpg"
+    },
+    {
+      "index": "219",
+      "name": "I-15 : (219) 0.6mi South Of Kenwood",
+      "lat": 34.23009,
+      "lon": -117.41801,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i1521906misouthofkenwood/i1521906misouthofkenwood.jpg"
+    },
+    {
+      "index": "102",
+      "name": "I-15 : (102) N of Glen Helen Parkway",
+      "lat": 34.211,
+      "lon": -117.41222,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15102nofglenhelenparkway/i15102nofglenhelenparkway.jpg"
+    },
+    {
+      "index": "101",
+      "name": "I-15 : (101) Glen Helen Parkway",
+      "lat": 34.20293,
+      "lon": -117.41499,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15101glenhelenparkway/i15101glenhelenparkway.jpg"
+    },
+    {
+      "index": "100",
+      "name": "I-15 : (100) S of Glen Helen Parkway",
+      "lat": 34.19384,
+      "lon": -117.42045,
+      "imageUrl": "https://cwwp2.dot.ca.gov/data/d8/cctv/image/i15100sofglenhelenparkway/i15100sofglenhelenparkway.jpg"
+    }
+  ]
+}

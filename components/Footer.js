@@ -67,6 +67,7 @@ export default function Footer() {
             <a href="https://bigbearroads.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">bigbearroads.com</a>
             <a href="https://395live.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">395live.com</a>
             <a href="https://mammothpass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">mammothpass.com</a>
+            <a href="https://coquihallalive.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">coquihallalive.com</a>
           </div>
         </div>
       </div>

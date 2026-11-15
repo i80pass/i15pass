@@ -45,11 +45,11 @@ export default function CameraGrid({ cameras, showCorridor = false }) {
             ) : (
               <Link key={view.id} href={`/camera/${view.id}`} className="glass-card rounded-2xl overflow-hidden aura-shadow-hover block">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={view.url} alt={`${cam.location || "Nevada 511 camera"} live still`} loading="lazy" width="320" height="240" className="w-full aspect-[4/3] object-cover bg-surface-container" />
+                <img src={view.url} alt={`${cam.location || "Road camera"} live still`} loading="lazy" width="320" height="240" className="w-full aspect-[4/3] object-cover bg-surface-container" />
                 <div className="p-3">
                   <p className="text-sm font-bold text-on-surface leading-snug">{cam.location || `Camera ${view.id}`}</p>
                   <p className="text-xs text-secondary mt-0.5">
-                    {showCorridor && cam.roadway ? `${cam.roadway} | ` : ""}{cam.direction || ""} Live still, Nevada 511
+                    {showCorridor && cam.roadway ? `${cam.roadway} | ` : ""}{cam.direction || ""} Live still, {cam.source === "Caltrans" ? "Caltrans" : "Nevada 511"}
                   </p>
                 </div>
               </Link>

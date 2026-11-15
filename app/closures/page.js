@@ -9,7 +9,7 @@ export const revalidate = 120;
 
 export const metadata = {
   title: "I-15 Road Closures | Las Vegas to Barstow and St. George",
-  description: "Current full closures on I-15 between Las Vegas, Primm, Mountain Pass, Mesquite, and the Virgin River Gorge, read live from Nevada 511, with the alternatives that actually work.",
+  description: "Current full closures on I-15 between Las Vegas, Primm, Mountain Pass, Mesquite, the Virgin River Gorge, and Cajon Pass, read live from Nevada 511 and Caltrans, with the alternatives that actually work.",
   alternates: { canonical: "/closures" },
 };
 
@@ -27,8 +27,8 @@ export default async function ClosuresPage() {
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">I-15 closures</h1>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
         {anyClosure
-          ? "Nevada 511 is reporting at least one full closure on this corridor right now. The closed stretches are listed first, in NDOT's own words."
-          : "No full closure is reported on any stretch of this corridor right now. Each stretch below carries its live verdict, so a closure appears here the moment NDOT posts it."}
+          ? "A full closure is reported on at least one stretch of this corridor right now. The closed stretches are listed first, in the posting agency's own words."
+          : "No full closure is reported on any stretch of this corridor right now. Each stretch below carries its live verdict, so a closure appears here the moment it is posted."}
       </p>
       <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
       <div className="grid gap-4 mt-7">
@@ -54,7 +54,9 @@ export default async function ClosuresPage() {
               <p className="text-sm text-secondary mt-2 leading-relaxed">
                 {status.live
                   ? "No full closure posted for this stretch. Lane closures and slowdowns still show on the corridor page."
-                  : "The live verdict for this stretch appears here the moment the Nevada 511 feed is connected."}
+                  : corridor.statusSource === "caltrans"
+                    ? "The live verdict for this stretch appears here the moment the Caltrans feed answers."
+                    : "The live verdict for this stretch appears here the moment the Nevada 511 feed is connected."}
               </p>
             )}
             <p className="mt-3 text-sm">

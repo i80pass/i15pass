@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site-config";
 import { CORRIDORS } from "@/lib/corridors";
 
@@ -9,6 +12,12 @@ import { CORRIDORS } from "@/lib/corridors";
 // SITE.logoPath (public/i15pass-logo.png) with the same treatment as
 // the other network sites: the logo image plus the site name.
 export default function Header() {
+  const pathname = usePathname();
+  // Corridor bar active state (Gold Standard pattern): the primary
+  // corridor (Las Vegas, first in flagship order) lights on the
+  // homepage, and each corridor page lights its own pill only.
+  const pillClass = (active) =>
+    `px-3 py-1 rounded-full ${active ? "bg-white text-[#0f172a] shadow-sm" : "hover:bg-white/10"}`;
   return (
     <header className="fixed top-0 inset-x-0 z-50 bg-primary text-on-primary shadow-md">
       <div className="px-container-padding-mobile md:px-container-padding-desktop">
@@ -36,13 +45,22 @@ export default function Header() {
       </div>
       <nav className="bg-[#0f172a] text-white overflow-x-auto hide-scrollbar">
         <div className="flex gap-1 px-2 py-1.5 whitespace-nowrap text-[13px] font-semibold">
-          {CORRIDORS.map((c) => (
-            <Link key={c.slug} href={`/${c.slug}`} className="px-3 py-1 rounded-full hover:bg-white/10">
-              {c.routeLabel} {c.shortName}
-            </Link>
-          ))}
-          <Link href="/closures" className="px-3 py-1 rounded-full hover:bg-white/10">Closures</Link>
-          <Link href="/compare" className="px-3 py-1 rounded-full hover:bg-white/10">Compare the Drives</Link>
+          {CORRIDORS.map((c) => {
+            const active =
+              pathname === `/${c.slug}` || (pathname === "/" && c.slug === CORRIDORS[0].slug);
+            return (
+              <Link
+                key={c.slug}
+                href={`/${c.slug}`}
+                aria-current={active ? "page" : undefined}
+                className={pillClass(active)}
+              >
+                {c.routeLabel} {c.shortName}
+              </Link>
+            );
+          })}
+          <Link href="/closures" aria-current={pathname === "/closures" ? "page" : undefined} className={pillClass(pathname === "/closures")}>Closures</Link>
+          <Link href="/compare" aria-current={pathname === "/compare" ? "page" : undefined} className={pillClass(pathname === "/compare")}>Compare the Drives</Link>
         </div>
       </nav>
     </header>

@@ -57,7 +57,10 @@ export default function RootLayout({ children }) {
         )}
         <div className="min-h-screen flex flex-col overflow-x-hidden">
           <Header />
-          <div className="pt-24 md:pt-28 flex-1">{children}</div>
+          {/* Top padding matches the fixed header exactly: brand row
+              (56px mobile, 64px desktop) plus the 48px corridor tap
+              bar with its padding (64px at every width). */}
+          <div className="pt-[120px] md:pt-32 flex-1">{children}</div>
           <Footer />
           <BottomNav />
         </div>

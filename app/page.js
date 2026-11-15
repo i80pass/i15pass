@@ -2,6 +2,7 @@ import Link from "next/link";
 import StatusBanner from "@/components/StatusBanner";
 import CameraGrid from "@/components/CameraGrid";
 import FaqBlock from "@/components/FaqBlock";
+import AdSlot from "@/components/AdSlot";
 import JsonLd from "@/components/JsonLd";
 import { SITE } from "@/lib/site-config";
 import { CORRIDORS, statusCorridor } from "@/lib/corridors";
@@ -76,6 +77,10 @@ export default async function HomePage() {
         )}
       </section>
 
+      {/* Ad slot 1 of 2: below the webcams.
+          Renders nothing until AdSense is activated (AdSlot gate). */}
+      <AdSlot slot="belowCameras" />
+
       <section className="mt-12 glass-card rounded-2xl p-4 md:p-5">
         <h2 className="text-headline-sm text-on-surface mb-2">Walk the Strip by camera</h2>
         <p className="text-sm md:text-base text-secondary leading-relaxed">
@@ -121,6 +126,10 @@ export default async function HomePage() {
       </section>
 
       <FaqBlock faqs={HOME_FAQS} />
+
+      {/* Ad slot 2 of 2: lower page, above the footer.
+          Renders nothing until AdSense is activated (AdSlot gate). */}
+      <AdSlot slot="lowerPage" />
     </main>
   );
 }

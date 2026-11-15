@@ -41,6 +41,12 @@ export const viewport = { width: "device-width", initialScale: 1 };
 
 export default function RootLayout({ children }) {
   const gaId = SITE.gaId;
+  // AdSense (approved Nov 15, 2026): the loader renders only when the
+  // publisher ID is set at build time, same conditional pattern as GA
+  // above. Unset means no script tag at all, so the site is unchanged
+  // until activation. The ad units themselves live in
+  // components/AdSlot.js under the same gate.
+  const adsenseId = SITE.adsenseId;
   return (
     <html lang="en" className={`${inter.variable} ${materialSymbols.variable}`}>
       <body className="bg-surface text-on-surface antialiased overflow-x-hidden">
@@ -54,6 +60,13 @@ export default function RootLayout({ children }) {
               gtag('config', '${gaId}');
             `}</Script>
           </>
+        )}
+        {adsenseId && (
+          <Script
+            src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
+            strategy="lazyOnload"
+            crossOrigin="anonymous"
+          />
         )}
         <div className="min-h-screen flex flex-col overflow-x-hidden">
           <Header />

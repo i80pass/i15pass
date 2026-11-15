@@ -1,0 +1,8 @@
+# ads.txt for i15pass.com
+# Google AdSense was approved for this site on Nov 15, 2026 (manual
+# fixed slots only, no Auto Ads). The publisher ID has not been
+# issued yet, so there are no authorized seller lines yet.
+# When the ID exists, add exactly one line in this form, replacing
+# <id> with the numeric part of the publisher ID (the part after
+# "ca-pub-"):
+# google.com, pub-<id>, DIRECT, f08c47fec0942fa0

@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import StatusBanner from "@/components/StatusBanner";
 import CameraGrid from "@/components/CameraGrid";
 import FaqBlock from "@/components/FaqBlock";
+import AdSlot from "@/components/AdSlot";
 import EditorialSections from "@/components/EditorialSections";
 import JsonLd from "@/components/JsonLd";
 import StatelineBoard from "@/components/StatelineBoard";
@@ -306,6 +307,10 @@ async function CorridorPage({ corridor }) {
         )}
       </section>
 
+      {/* Ad slot 1 of 2: below the webcams.
+          Renders nothing until AdSense is activated (AdSlot gate). */}
+      <AdSlot slot="belowCameras" />
+
       <SegmentsList segments={status.segments} agency={corridor.agency} credit={corridor.dataCreditShort} />
       <StationTable stations={myStations} />
       <SummitWeather corridor={corridor} />
@@ -342,6 +347,10 @@ async function CorridorPage({ corridor }) {
       </section>
 
       <FaqBlock faqs={corridor.faqs} />
+
+      {/* Ad slot 2 of 2: lower page, above the footer.
+          Renders nothing until AdSense is activated (AdSlot gate). */}
+      <AdSlot slot="lowerPage" />
     </main>
   );
 }

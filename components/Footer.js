@@ -69,6 +69,8 @@ export default function Footer() {
         <a href="https://wasatchpasses.com" className="hover:text-white">wasatchpasses.com</a>
         {" · "}
         <a href="https://grapevinepass.com" className="hover:text-white">grapevinepass.com</a>
+        {" · "}
+        <a href="https://bigbearroads.com" className="hover:text-white">bigbearroads.com</a>
       </div>
     </footer>
   );

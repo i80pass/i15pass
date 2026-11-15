@@ -1,43 +1,62 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { SITE } from "@/lib/site-config";
 import CorridorNav from "@/components/CorridorNav";
 
-// Header in the i80pass master pattern: brand block, primary nav, and
-// the corridor pill bar. LOGO: the confirmed family master for this
-// site, supplied by Tracy and vaulted at
-// ~/workspace/your_files/logo-vault/i15pass-logo.png, served from
-// SITE.logoPath (public/i15pass-logo.png) with the same treatment as
-// the other network sites: the logo image plus the site name.
-// The corridor pill bar lives in components/CorridorNav.js (split
-// out Nov 15, 2026 per the tap target spec), rendered inside this
-// same fixed header element. Header tap targets: the brand link,
-// the desktop primary nav links, and the mobile Live Feed link all
-// carry a 48px minimum height per the roadside tap standard.
+// Header in the i80pass master build (Nov 15, 2026 network template
+// audit). This site was the network outlier: a dark navy bar with a
+// small logo and the site name repeated as text. It now matches the
+// master and the sister clones exactly: fixed, h-28, light
+// translucent surface with backdrop blur, the vault logo large at
+// master size (the logo carries the wordmark, so no site name text
+// sits beside it), a search icon link on mobile, and the section nav
+// on desktop with the master active state: the current section
+// primary and bold, the rest fading on hover. The corridor pill bar
+// stays in CorridorNav, rendered under the brand row inside this
+// fixed header element, as before.
+const LINKS = [
+  { href: "/cameras", label: "Cameras" },
+  { href: "/las-vegas-strip-camera-tour", label: "Strip Tour" },
+  { href: SITE.lawPath, label: "Chain Rules" },
+  { href: "/live-feed", label: "Live Feed" },
+  { href: "/alerts", label: "Alerts" },
+  { href: "/status-history", label: "Status History" },
+];
+
 export default function Header() {
+  const pathname = usePathname();
+  const isActive = (path) => pathname === path;
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-primary text-on-primary shadow-md">
-      <div className="px-container-padding-mobile md:px-container-padding-desktop">
-        <div className="flex items-center justify-between h-14 md:h-16">
-          <Link href="/" className="flex items-center gap-3 min-w-0 min-h-[48px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={SITE.logoPath}
-              alt={`${SITE.name} logo`}
-              className="h-10 w-auto shrink-0"
-            />
-            <span className="text-lg md:text-xl font-extrabold tracking-tight">{SITE.name}</span>
-            <span className="hidden md:inline text-xs text-on-primary-container font-medium">{SITE.regionLabel}</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-5 text-sm font-semibold">
-            <Link href="/cameras" className="inline-flex items-center min-h-[48px] hover:text-on-primary-container">Cameras</Link>
-            <Link href="/las-vegas-strip-camera-tour" className="inline-flex items-center min-h-[48px] hover:text-on-primary-container">Strip Tour</Link>
-            <Link href={SITE.lawPath} className="inline-flex items-center min-h-[48px] hover:text-on-primary-container">Chain Rules</Link>
-            <Link href="/live-feed" className="inline-flex items-center min-h-[48px] hover:text-on-primary-container">Live Feed</Link>
-            <Link href="/alerts" className="inline-flex items-center min-h-[48px] hover:text-on-primary-container">Alerts</Link>
-            <Link href="/status-history" className="inline-flex items-center min-h-[48px] hover:text-on-primary-container">Status History</Link>
-          </nav>
-          <Link href="/live-feed" className="md:hidden inline-flex items-center min-h-[48px] px-2 text-sm font-semibold">Live Feed</Link>
-        </div>
+    <header className="fixed top-0 inset-x-0 z-50">
+      <div className="flex justify-between items-center px-container-padding-mobile md:px-container-padding-desktop h-28 bg-surface/80 backdrop-blur-xl border-b border-outline-variant/30 shadow-sm">
+        <Link href="/" className="flex items-center shrink-0" aria-label={`${SITE.name} home`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={SITE.logoPath} alt={SITE.name} className="h-24 w-auto md:h-[6.75rem] object-contain" />
+        </Link>
+
+        {/* Mobile: one icon link, in the master position. The search
+            glyph is verified present in the local icon subset. */}
+        <Link
+          href="/live-feed"
+          aria-label="Search cameras"
+          className="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container active:scale-95 transition-all text-secondary"
+        >
+          <span className="material-symbols-outlined text-[24px]">search</span>
+        </Link>
+
+        <nav className="hidden md:flex items-center gap-5 text-label-md text-secondary">
+          {LINKS.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={isActive(l.href) ? "text-primary font-bold" : "hover:opacity-80 transition-opacity"}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
       </div>
       <CorridorNav />
     </header>

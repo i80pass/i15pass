@@ -54,6 +54,22 @@ export default function Footer() {
         <span>{SITE.name} is a {SITE.parentName} site.</span>
         <span>{SITE.dataCreditShort} | Weather: National Weather Service</span>
       </div>
+      <div className="px-container-padding-mobile md:px-container-padding-desktop pb-4 text-xs text-white/50">
+        More mountain passes:{" "}
+        <a href="https://i80pass.com" className="hover:text-white">i80pass.com</a>
+        {" · "}
+        <a href="https://i90live.com" className="hover:text-white">i90live.com</a>
+        {" · "}
+        <a href="https://i5pass.com" className="hover:text-white">i5pass.com</a>
+        {" · "}
+        <a href="https://idahopass.com" className="hover:text-white">idahopass.com</a>
+        {" · "}
+        <a href="https://us2pass.com" className="hover:text-white">us2pass.com</a>
+        {" · "}
+        <a href="https://wasatchpasses.com" className="hover:text-white">wasatchpasses.com</a>
+        {" · "}
+        <a href="https://grapevinepass.com" className="hover:text-white">grapevinepass.com</a>
+      </div>
     </footer>
   );
 }

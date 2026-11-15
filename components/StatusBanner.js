@@ -56,7 +56,7 @@ export default function StatusBanner({ corridor, status, heading, href = null })
         box
       )}
       <p className="text-[11px] text-secondary mt-2 font-mono uppercase tracking-wide">
-        {SITE.dataCreditShort}{updated ? ` | Nevada 511 report ${updated} PT` : ""}
+        {corridor.dataCreditShort || SITE.dataCreditShort}{updated ? ` | ${corridor.statusSource === "caltrans" ? "Caltrans" : "Nevada 511"} report ${updated} PT` : ""}
       </p>
       {corridor.coverageNote && (
         <p className="text-sm text-secondary leading-relaxed mt-2">{corridor.coverageNote}</p>
@@ -64,7 +64,9 @@ export default function StatusBanner({ corridor, status, heading, href = null })
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-label-md text-secondary">
         <Link href={`/${corridor.slug}`} className="text-primary font-semibold">Full corridor page</Link>
         <Link href={`/${corridor.slug}-cameras`} className="text-primary font-semibold">Cameras in driving order</Link>
-        <Link href={SITE.lawPath} className="text-primary font-semibold">{SITE.lawLabel}</Link>
+        {!corridor.hideLawLink && (
+          <Link href={SITE.lawPath} className="text-primary font-semibold">{SITE.lawLabel}</Link>
+        )}
       </div>
     </section>
   );

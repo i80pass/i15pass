@@ -56,7 +56,7 @@ export async function generateMetadata({ params }) {
     const c = r.corridor;
     return {
       title: `${c.name} Road Conditions and Cameras | ${c.routeLabel} Live`,
-      description: `Live ${c.name} (${c.routeLabel}) road conditions, Nevada 511 cameras in driving order, posted restrictions, and weather from ${c.fromTo}.`,
+      description: `Live ${c.name} (${c.routeLabel}) road conditions, ${c.agency || "Nevada 511"} cameras in driving order, posted restrictions, and weather from ${c.fromTo}.`,
       alternates: { canonical: `/${c.slug}` },
     };
   }
@@ -64,7 +64,7 @@ export async function generateMetadata({ params }) {
     const c = r.corridor;
     return {
       title: `${c.name} Cameras in Driving Order | ${c.routeLabel}`,
-      description: `Every Nevada 511 camera on ${c.name} (${c.routeLabel}), sequenced in driving order, each with its own page.`,
+      description: `Every ${c.agency || "Nevada 511"} camera on ${c.name} (${c.routeLabel}), sequenced in driving order, each with its own page.`,
       alternates: { canonical: `/${c.slug}-cameras` },
     };
   }
@@ -89,12 +89,12 @@ export async function generateMetadata({ params }) {
   };
 }
 
-function EventList({ events }) {
+function EventList({ events, agency, credit }) {
   if (!events?.length) return null;
   const cleaned = events.map(cleanEvent);
   return (
     <section className="mt-8">
-      <h2 className="text-xl font-bold text-on-surface mb-3">NDOT is reporting</h2>
+      <h2 className="text-xl font-bold text-on-surface mb-3">{agency ? `${agency} is reporting` : "NDOT is reporting"}</h2>
       <div className="glass-card rounded-2xl divide-y divide-outline-variant/20 overflow-hidden">
         {cleaned.slice(0, 10).map((e, i) => (
           <div key={i} className="px-4 py-3">
@@ -105,16 +105,16 @@ function EventList({ events }) {
           </div>
         ))}
       </div>
-      <p className="text-xs text-secondary mt-2">{SITE.dataCreditShort}</p>
+      <p className="text-xs text-secondary mt-2">{credit || SITE.dataCreditShort}</p>
     </section>
   );
 }
 
-function SegmentsList({ segments }) {
+function SegmentsList({ segments, agency, credit }) {
   if (!segments?.length) return null;
   return (
     <section className="mt-8">
-      <h2 className="text-xl font-bold text-on-surface mb-3">What NDOT posts on this stretch</h2>
+      <h2 className="text-xl font-bold text-on-surface mb-3">{agency ? `What ${agency} posts on this stretch` : "What NDOT posts on this stretch"}</h2>
       <div className="glass-card rounded-2xl divide-y divide-outline-variant/20 overflow-hidden">
         {segments.slice(0, 8).map((s, i) => (
           <div key={i} className="px-4 py-3">
@@ -125,7 +125,7 @@ function SegmentsList({ segments }) {
           </div>
         ))}
       </div>
-      <p className="text-xs text-secondary mt-2">Posted in NDOT's own words by Nevada 511. {SITE.dataCreditShort}.</p>
+      <p className="text-xs text-secondary mt-2">{agency ? `Posted in Caltrans' own words, from the Caltrans District 8 feed. ${credit}.` : `Posted in NDOT's own words by Nevada 511. ${SITE.dataCreditShort}.`}</p>
     </section>
   );
 }
@@ -297,10 +297,10 @@ async function CorridorPage({ corridor }) {
         <CameraGrid cameras={displayCameras(corridor, cameras).slice(0, 6)} />
       </section>
 
-      <SegmentsList segments={status.segments} />
+      <SegmentsList segments={status.segments} agency={corridor.agency} credit={corridor.dataCreditShort} />
       <StationTable stations={myStations} />
       <SummitWeather corridor={corridor} />
-      <EventList events={status.events} />
+      <EventList events={status.events} agency={corridor.agency} credit={corridor.dataCreditShort} />
 
       <section className="mt-10">
         <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Corridor checkpoints</h2>
@@ -343,17 +343,17 @@ async function StripPage({ corridor }) {
   return (
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
       <JsonLd data={[
-        webPageSchema({ path: `/${corridor.slug}-cameras`, title: `${corridor.name} Cameras`, description: `Every Nevada 511 camera on ${corridor.name}, in driving order.` }),
+        webPageSchema({ path: `/${corridor.slug}-cameras`, title: `${corridor.name} Cameras`, description: `Every ${corridor.agency || "Nevada 511"} camera on ${corridor.name}, in driving order.` }),
         cameraListSchema(cameras, corridor.name),
       ]} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{corridor.name} cameras</h1>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
-        Every Nevada 511 camera on {corridor.routeLabel} through {corridor.name}, sequenced in driving order from{" "}
+        Every {corridor.agency || "Nevada 511"} camera on {corridor.routeLabel} through {corridor.name}, sequenced in driving order from{" "}
         {corridor.fromTo.split(" to ")[0]} to {corridor.fromTo.split(" to ").slice(1).join(" to ") || corridor.summit.name}.
         Read them in sequence and you can watch traffic build, weather change, and queues form before you drive into them.
         Each frame opens its own page with the local notes for that spot.
       </p>
-      <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
+      <p className="text-sm text-secondary mt-2">{corridor.statusSource === "caltrans" ? "Camera data: Caltrans District 8. Images refresh about every minute at the source." : SITE.dataCredit}</p>
       <div className="mt-6">
         <CameraGrid cameras={display} />
       </div>

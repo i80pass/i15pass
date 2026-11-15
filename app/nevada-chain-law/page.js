@@ -32,7 +32,7 @@ export default async function LawPage() {
         <h2 className="text-xl font-bold text-on-surface mb-3">Live postings, stretch by stretch</h2>
         <div className="grid gap-4">
           {CORRIDORS.map((c, i) => (
-            <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />
+            <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
           ))}
         </div>
       </section>

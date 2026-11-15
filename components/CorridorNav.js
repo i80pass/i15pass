@@ -27,7 +27,7 @@ export default function CorridorNav() {
     { href: "/compare", label: "Compare the Drives", corridor: false },
   ];
   return (
-    <nav aria-label="Corridors" className="bg-[#0f172a] text-white">
+    <nav aria-label="Corridors" className="bg-[#0f172a] text-white border-b border-white/10">
       <div className="flex flex-nowrap gap-1.5 px-2 py-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
         {entries.map((e) => {
           const active =
@@ -39,8 +39,10 @@ export default function CorridorNav() {
               key={e.href}
               href={e.href}
               aria-current={active ? "page" : undefined}
-              className={`flex items-center shrink-0 min-h-[48px] text-sm font-semibold px-4 py-3 rounded-full whitespace-nowrap touch-manipulation select-none ${
-                active ? "bg-white text-[#0f172a]" : "text-white hover:bg-white/10"
+              className={`flex items-center shrink-0 min-h-[48px] text-sm font-semibold px-4 py-3 rounded-full whitespace-nowrap touch-manipulation select-none transition-all ${
+                active
+                  ? "bg-white text-[#0f172a] shadow-sm"
+                  : "text-white/70 border border-white/30 hover:border-white/60 hover:text-white"
               }`}
             >
               {e.label}

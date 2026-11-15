@@ -1,0 +1,53 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import { CORRIDORS } from "@/lib/corridors";
+
+// Corridor pill bar, split out of Header per the tap target spec
+// (Nov 15, 2026), copying the grapevinepass CorridorNav mechanics:
+// a client component that reads the current path so it can mark the
+// active pill, plain anchors so a tap is a native browser navigation
+// that works before hydration and on a weak signal, one horizontal
+// sliding row at every width, and a 48px minimum tap target on every
+// pill. Same hrefs, same order, and same labels as the inline bar it
+// replaces, so no internal link changes. Active rule: a corridor
+// pill is active on its own page and on its camera strip page
+// (href plus "-cameras"), the first corridor pill is active on the
+// homepage, and the Closures and Compare pills are active only on
+// an exact path match. At most one pill is active on any path.
+export default function CorridorNav() {
+  const pathname = usePathname();
+  const entries = [
+    ...CORRIDORS.map((c) => ({
+      href: `/${c.slug}`,
+      label: `${c.routeLabel} ${c.shortName}`,
+      corridor: true,
+    })),
+    { href: "/closures", label: "Closures", corridor: false },
+    { href: "/compare", label: "Compare the Drives", corridor: false },
+  ];
+  return (
+    <nav aria-label="Corridors" className="bg-[#0f172a] text-white">
+      <div className="flex flex-nowrap gap-1.5 px-2 py-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
+        {entries.map((e) => {
+          const active =
+            pathname === e.href ||
+            (e.corridor && pathname === `${e.href}-cameras`) ||
+            (pathname === "/" && e.href === `/${CORRIDORS[0].slug}`);
+          return (
+            <a
+              key={e.href}
+              href={e.href}
+              aria-current={active ? "page" : undefined}
+              className={`flex items-center shrink-0 min-h-[48px] text-sm font-semibold px-4 py-3 rounded-full whitespace-nowrap touch-manipulation select-none ${
+                active ? "bg-white text-[#0f172a]" : "text-white hover:bg-white/10"
+              }`}
+            >
+              {e.label}
+            </a>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

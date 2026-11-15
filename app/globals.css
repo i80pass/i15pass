@@ -49,6 +49,10 @@
     background: #0f172a;
     color: #ffffff;
     border: 1px solid rgba(255,255,255,0.08);
+    min-height: 48px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
   .aura-shadow {
     box-shadow: 0 10px 40px rgba(0, 82, 136, 0.05);

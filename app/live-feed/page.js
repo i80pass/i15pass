@@ -27,7 +27,7 @@ export default async function LiveFeedPage() {
       <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
       <div className="grid gap-4 mt-7">
         {CORRIDORS.map((c, i) => (
-          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
         ))}
       </div>
       <section className="mt-10">

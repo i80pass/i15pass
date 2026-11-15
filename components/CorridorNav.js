@@ -28,7 +28,7 @@ export default function CorridorNav() {
   ];
   return (
     <nav aria-label="Corridors" className="bg-[#0f172a] text-white border-b border-white/10">
-      <div className="flex flex-nowrap gap-1.5 px-2 py-2 overflow-x-auto hide-scrollbar whitespace-nowrap">
+      <div className="flex gap-1.5 overflow-x-auto hide-scrollbar px-container-padding-mobile md:px-container-padding-desktop py-2">
         {entries.map((e) => {
           const active =
             pathname === e.href ||
@@ -39,7 +39,7 @@ export default function CorridorNav() {
               key={e.href}
               href={e.href}
               aria-current={active ? "page" : undefined}
-              className={`flex items-center shrink-0 min-h-[48px] text-sm font-semibold px-4 py-3 rounded-full whitespace-nowrap touch-manipulation select-none transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-label-md font-bold whitespace-nowrap shrink-0 transition-all ${
                 active
                   ? "bg-white text-[#0f172a] shadow-sm"
                   : "text-white/70 border border-white/30 hover:border-white/60 hover:text-white"

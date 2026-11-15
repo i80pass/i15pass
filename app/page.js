@@ -63,7 +63,14 @@ export default async function HomePage() {
           <h2 className="text-xl md:text-2xl font-bold text-on-surface">Las Vegas cameras</h2>
           <Link href="/las-vegas-cameras" className="text-sm font-bold text-primary">All Las Vegas cameras</Link>
         </div>
-        <CameraGrid cameras={displayCameras(CORRIDORS[0], vegasCameras).slice(0, 6)} />
+        <CameraGrid cameras={displayCameras(CORRIDORS[0], vegasCameras).slice(0, 3)} />
+        <Link
+          href="/las-vegas-cameras"
+          className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+        >
+          <span className="material-symbols-outlined text-[18px]">videocam</span>
+          SEE ALL WEBCAMS
+        </Link>
         {vegasCameras.length > 0 && (
           <p className="text-xs text-secondary mt-2">{SITE.dataCreditShort}. Stills refresh about every minute at the source.</p>
         )}

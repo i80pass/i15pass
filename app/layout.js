@@ -58,9 +58,10 @@ export default function RootLayout({ children }) {
         <div className="min-h-screen flex flex-col overflow-x-hidden">
           <Header />
           {/* Top padding matches the fixed header exactly: the
-              master h-28 brand row (112px) plus the 48px corridor
-              tap bar with its padding (64px), at every width. */}
-          <div className="pt-[176px] flex-1">{children}</div>
+              master h-28 brand row (112px) plus the corridor bar
+              with the master pills and its padding (50px), at
+              every width. */}
+          <div className="pt-[162px] flex-1">{children}</div>
           <Footer />
           <BottomNav />
         </div>

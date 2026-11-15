@@ -27,8 +27,14 @@
   .text-body-md { font-size: 16px; line-height: 24px; font-weight: 400; }
   .text-headline-sm { font-size: 20px; line-height: 28px; font-weight: 600; }
   .text-headline-md { font-size: 24px; line-height: 32px; letter-spacing: -0.01em; font-weight: 600; }
-  .text-display-lg { font-size: 48px; line-height: 56px; letter-spacing: -0.02em; font-weight: 700; }
-  .text-display-lg-mobile { font-size: 36px; line-height: 44px; letter-spacing: -0.02em; font-weight: 700; }
+  /* Headline treatment aligned to the i80pass master on Nov 14, 2026
+     (Phase 3B typography uniformity): the master headline is Inter
+     black, uppercase, wide tracked, 20px stepping to 24px. These two
+     utilities carry every page H1 on this site, so they now resolve to
+     the master treatment instead of the old 36/48px sentence case
+     display scale from this site's original build batch. */
+  .text-display-lg { font-size: 24px; line-height: 32px; letter-spacing: 0.025em; font-weight: 900; text-transform: uppercase; }
+  .text-display-lg-mobile { font-size: 20px; line-height: 28px; letter-spacing: 0.025em; font-weight: 900; text-transform: uppercase; }
   .text-label-sm { font-size: 12px; line-height: 16px; letter-spacing: 0.02em; font-weight: 500; }
   .text-label-md { font-size: 14px; line-height: 20px; letter-spacing: 0.01em; font-weight: 600; }
 

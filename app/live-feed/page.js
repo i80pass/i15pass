@@ -9,7 +9,7 @@ export const revalidate = 120;
 
 export const metadata = {
   title: "Live Feed | All I-15 Corridor Conditions in One Stream",
-  description: "Every Nevada 511 condition posting, event, and corridor verdict for Las Vegas, Primm, the Mountain Pass approach, and Mesquite in one live stream.",
+  description: "Every condition posting, event, and corridor verdict for Las Vegas, Primm, the Mountain Pass approach, Mesquite, and Cajon Pass in one live stream, from Nevada 511 and Caltrans.",
   alternates: { canonical: "/live-feed" },
 };
 
@@ -21,7 +21,7 @@ export default async function LiveFeedPage() {
       <JsonLd data={webPageSchema({ path: "/live-feed", title: metadata.title, description: metadata.description })} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">Live feed</h1>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
-        The whole corridor in one stream: a live verdict per stretch, then every NDOT event the feed is carrying for
+        The whole corridor in one stream: a live verdict per stretch, then every agency event the feeds are carrying for
         these roads. This is the page to leave open on a getaway Friday, a fight night, or a storm day.
       </p>
       <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
@@ -43,7 +43,7 @@ export default async function LiveFeedPage() {
           </div>
         ) : (
           <div className="glass-card rounded-2xl p-4 text-sm text-secondary leading-relaxed">
-            No events are showing for this corridor right now. When the live feed is connected, NDOT incidents,
+            No events are showing for this corridor right now. When the live feeds are connected, incidents,
             roadwork, and closures stream here as they are posted.
           </div>
         )}

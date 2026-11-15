@@ -294,7 +294,16 @@ async function CorridorPage({ corridor }) {
           <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
           <Link href={`/${corridor.slug}-cameras`} className="text-sm font-bold text-primary">Full camera strip</Link>
         </div>
-        <CameraGrid cameras={displayCameras(corridor, cameras).slice(0, 6)} />
+        <CameraGrid cameras={displayCameras(corridor, cameras).slice(0, cameras.length > 5 ? 3 : 6)} />
+        {cameras.length > 5 && (
+          <Link
+            href={`/${corridor.slug}-cameras`}
+            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+          >
+            <span className="material-symbols-outlined text-[18px]">videocam</span>
+            SEE ALL WEBCAMS
+          </Link>
+        )}
       </section>
 
       <SegmentsList segments={status.segments} agency={corridor.agency} credit={corridor.dataCreditShort} />
@@ -473,7 +482,16 @@ async function RoutePage({ route }) {
       </div>
       <section className="mt-9">
         <h2 className="text-xl font-bold text-on-surface mb-3">Cameras along the way</h2>
-        <CameraGrid cameras={cameras} showCorridor />
+        <CameraGrid cameras={cameras.length > 5 ? cameras.slice(0, 3) : cameras} showCorridor />
+        {cameras.length > 5 && (
+          <Link
+            href="/cameras"
+            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
+          >
+            <span className="material-symbols-outlined text-[18px]">videocam</span>
+            SEE ALL WEBCAMS
+          </Link>
+        )}
       </section>
       <div className="mt-10 space-y-9">
         {route.segments.map((s) => (

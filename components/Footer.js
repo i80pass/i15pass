@@ -46,7 +46,6 @@ export default function Footer() {
             <li><Link href="/about" className="hover:text-white">About</Link></li>
             <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
             <li><Link href="/site-map" className="hover:text-white">Sitemap</Link></li>
-            <li><a href={SITE.networkUrl} className="hover:text-white">{SITE.networkLabel}</a></li>
           </ul>
         </nav>
       </div>
@@ -54,23 +53,22 @@ export default function Footer() {
         <span>{SITE.name} is a {SITE.parentName} site.</span>
         <span>{SITE.dataCreditShort} | Weather: National Weather Service</span>
       </div>
-      <div className="px-container-padding-mobile md:px-container-padding-desktop pb-4 text-xs text-white/50">
-        More mountain passes:{" "}
-        <a href="https://i80pass.com" className="hover:text-white">i80pass.com</a>
-        {" · "}
-        <a href="https://i90live.com" className="hover:text-white">i90live.com</a>
-        {" · "}
-        <a href="https://i5pass.com" className="hover:text-white">i5pass.com</a>
-        {" · "}
-        <a href="https://idahopass.com" className="hover:text-white">idahopass.com</a>
-        {" · "}
-        <a href="https://us2pass.com" className="hover:text-white">us2pass.com</a>
-        {" · "}
-        <a href="https://wasatchpasses.com" className="hover:text-white">wasatchpasses.com</a>
-        {" · "}
-        <a href="https://grapevinepass.com" className="hover:text-white">grapevinepass.com</a>
-        {" · "}
-        <a href="https://bigbearroads.com" className="hover:text-white">bigbearroads.com</a>
+      <div className="px-container-padding-mobile md:px-container-padding-desktop pb-6">
+        <div className="border-t border-white/10 pt-4">
+          <p className="text-center text-[11px] font-bold uppercase tracking-[0.13em] text-white/40 mb-3">Our pass network</p>
+          <div className="grid grid-cols-2 gap-x-8 max-w-[318px] mx-auto">
+            <a href="https://i80pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i80pass.com</a>
+            <a href="https://i90live.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i90live.com</a>
+            <a href="https://i5pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i5pass.com</a>
+            <a href="https://idahopass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">idahopass.com</a>
+            <a href="https://us2pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">us2pass.com</a>
+            <a href="https://wasatchpasses.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">wasatchpasses.com</a>
+            <a href="https://grapevinepass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">grapevinepass.com</a>
+            <a href="https://bigbearroads.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">bigbearroads.com</a>
+            <a href="https://395live.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">395live.com</a>
+            <a href="https://mammothpass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">mammothpass.com</a>
+          </div>
+        </div>
       </div>
     </footer>
   );

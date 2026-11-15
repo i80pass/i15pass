@@ -11,7 +11,7 @@ import { statusSentence } from "@/lib/ndot";
 // and comparison pages so the verdict reads the same everywhere, the
 // way the master does it. (Before Nov 14, 2026 this was a text card
 // with small status chips; the network standard is the colored box.)
-export default function StatusBanner({ corridor, status, heading }) {
+export default function StatusBanner({ corridor, status, heading, href = null }) {
   const sentence = statusSentence(corridor, status);
   const updated = status.updatedAt
     ? new Date(status.updatedAt * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
@@ -32,19 +32,29 @@ export default function StatusBanner({ corridor, status, heading }) {
           ? "CHAIN CONTROL POSTED"
           : "RESTRICTION POSTED"
       : null;
+  const box = (
+    <div className={`flex items-center gap-5 p-5 rounded-2xl aura-shadow ${bannerBg}`}>
+      <div className="w-16 h-16 shrink-0 bg-white rounded-xl flex items-center justify-center drop-shadow-lg">
+        <span className="text-[15px] font-black text-slate-900 text-center leading-tight px-1">{corridor.routeLabel}</span>
+      </div>
+      <div>
+        <p className="text-3xl md:text-4xl font-black text-white leading-tight">{statusText}</p>
+        {tractionLine && <p className="text-white font-bold text-sm mt-1">{tractionLine}</p>}
+        <p className="answer-first text-white/80 font-semibold text-sm mt-1 leading-relaxed">{sentence}</p>
+      </div>
+      {href && (
+        <span aria-hidden="true" className="ml-auto pl-2 text-white/70 text-3xl font-black leading-none">›</span>
+      )}
+    </div>
+  );
   return (
     <section>
       <h2 className="text-headline-sm text-on-surface mb-2">{heading || `${corridor.routeLabel} ${corridor.name}`}</h2>
-      <div className={`flex items-center gap-5 p-5 rounded-2xl aura-shadow ${bannerBg}`}>
-        <div className="w-16 h-16 shrink-0 bg-white rounded-xl flex items-center justify-center drop-shadow-lg">
-          <span className="text-[15px] font-black text-slate-900 text-center leading-tight px-1">{corridor.routeLabel}</span>
-        </div>
-        <div>
-          <p className="text-3xl md:text-4xl font-black text-white leading-tight">{statusText}</p>
-          {tractionLine && <p className="text-white font-bold text-sm mt-1">{tractionLine}</p>}
-          <p className="answer-first text-white/80 font-semibold text-sm mt-1 leading-relaxed">{sentence}</p>
-        </div>
-      </div>
+      {href ? (
+        <Link href={href} className="block rounded-2xl">{box}</Link>
+      ) : (
+        box
+      )}
       <p className="text-[11px] text-secondary mt-2 font-mono uppercase tracking-wide">
         {SITE.dataCreditShort}{updated ? ` | Nevada 511 report ${updated} PT` : ""}
       </p>

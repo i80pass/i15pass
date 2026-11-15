@@ -21,7 +21,7 @@ export default async function ForMediaPage() {
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">For media</h1>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
         Covering a closure, a storm, or a getaway weekend gridlock on I-15? The verdicts below are live, quotable,
-        and updated from Nevada 511 about every two minutes. Take the sentence, credit the data, and link the page
+        and updated from Nevada 511 and Caltrans about every two minutes. Take the sentence, credit the data, and link the page
         it came from.
       </p>
       <section className="mt-8 grid gap-4">
@@ -38,10 +38,11 @@ export default async function ForMediaPage() {
       <div className="mt-9 max-w-3xl space-y-4">
         <h2 className="text-xl md:text-2xl font-bold text-on-surface">Credit and camera use</h2>
         <p className="text-sm md:text-base text-secondary leading-relaxed">
-          Conditions and camera images originate with Nevada 511, the Nevada Department of Transportation's
+          Conditions and camera images for the Nevada stretches originate with Nevada 511, the Nevada Department of Transportation's
           traveler information service, and should be credited to Nevada 511 / NDOT. This site republishes them
           under NDOT's developer terms with credit on every surface; if you reuse a camera still from these pages,
-          keep the Nevada 511 credit with it. Verdict sentences written by this site may be quoted with a link to
+          keep the Nevada 511 credit with it. Conditions and camera images for Cajon Pass originate with
+          Caltrans District 8 and should be credited to Caltrans. Verdict sentences written by this site may be quoted with a link to
           the corridor page.
         </p>
         <p className="text-sm md:text-base text-secondary leading-relaxed">

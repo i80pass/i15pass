@@ -2,35 +2,52 @@ import Link from "next/link";
 import { SITE } from "@/lib/site-config";
 import { statusSentence } from "@/lib/ndot";
 
-// The verdict block: answer first sentence (Speakable target), status
-// chips, and the data credit. Used on the homepage, corridor pages,
-// town pages, route pages, and comparison pages so the verdict reads
-// the same everywhere, the way the master does it.
+// The verdict block in the master (i80pass) treatment: a full width
+// colored verdict box (emerald when open, amber when a restriction is
+// posted, red when closed, slate when the feed is not reporting), the
+// status in the largest type on the page, the answer first sentence as
+// the status line inside the box, and the agency timestamp under the
+// box. Used on the homepage, corridor pages, town pages, route pages,
+// and comparison pages so the verdict reads the same everywhere, the
+// way the master does it. (Before Nov 14, 2026 this was a text card
+// with small status chips; the network standard is the colored box.)
 export default function StatusBanner({ corridor, status, heading }) {
   const sentence = statusSentence(corridor, status);
   const updated = status.updatedAt
     ? new Date(status.updatedAt * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
     : null;
+  const bannerBg = !status.live
+    ? "bg-slate-600"
+    : status.closed
+      ? "bg-red-700"
+      : status.traction?.inEffect
+        ? "bg-amber-500"
+        : "bg-emerald-600";
+  const statusText = !status.live ? "STATUS UNAVAILABLE" : status.closed ? "CLOSED" : "OPEN";
+  const tractionLine =
+    status.live && status.traction?.inEffect
+      ? status.traction.kind === "wind"
+        ? "WIND RESTRICTION POSTED"
+        : status.traction.kind === "chains"
+          ? "CHAIN CONTROL POSTED"
+          : "RESTRICTION POSTED"
+      : null;
   return (
-    <section className="glass-card rounded-2xl p-4 md:p-5 aura-shadow">
-      <div className="flex flex-wrap items-center gap-2 mb-2">
-        <h2 className="text-headline-sm text-on-surface mr-1">{heading || `${corridor.routeLabel} ${corridor.name}`}</h2>
-        {!status.live && (
-          <span className="text-label-sm px-2 py-0.5 rounded-full bg-surface-container-highest text-secondary">LIVE FEED PENDING</span>
-        )}
-        {status.live && status.closed && (
-          <span className="text-label-sm px-2 py-0.5 rounded-full bg-error text-on-error">CLOSED</span>
-        )}
-        {status.live && !status.closed && (
-          <span className="text-label-sm px-2 py-0.5 rounded-full bg-emerald-600 text-white">OPEN</span>
-        )}
-        {status.live && status.traction?.inEffect && (
-          <span className="text-label-sm px-2 py-0.5 rounded-full bg-amber-500 text-white">
-            {status.traction.kind === "wind" ? "WIND RESTRICTION POSTED" : status.traction.kind === "chains" ? "CHAIN CONTROL POSTED" : "RESTRICTION POSTED"}
-          </span>
-        )}
+    <section>
+      <h2 className="text-headline-sm text-on-surface mb-2">{heading || `${corridor.routeLabel} ${corridor.name}`}</h2>
+      <div className={`flex items-center gap-5 p-5 rounded-2xl aura-shadow ${bannerBg}`}>
+        <div className="w-16 h-16 shrink-0 bg-white rounded-xl flex items-center justify-center drop-shadow-lg">
+          <span className="text-[15px] font-black text-slate-900 text-center leading-tight px-1">{corridor.routeLabel}</span>
+        </div>
+        <div>
+          <p className="text-3xl md:text-4xl font-black text-white leading-tight">{statusText}</p>
+          {tractionLine && <p className="text-white font-bold text-sm mt-1">{tractionLine}</p>}
+          <p className="answer-first text-white/80 font-semibold text-sm mt-1 leading-relaxed">{sentence}</p>
+        </div>
       </div>
-      <p className="answer-first text-body-md text-on-surface leading-relaxed">{sentence}</p>
+      <p className="text-[11px] text-secondary mt-2 font-mono uppercase tracking-wide">
+        {SITE.dataCreditShort}{updated ? ` | Nevada 511 report ${updated} PT` : ""}
+      </p>
       {corridor.coverageNote && (
         <p className="text-sm text-secondary leading-relaxed mt-2">{corridor.coverageNote}</p>
       )}
@@ -39,9 +56,6 @@ export default function StatusBanner({ corridor, status, heading }) {
         <Link href={`/${corridor.slug}-cameras`} className="text-primary font-semibold">Cameras in driving order</Link>
         <Link href={SITE.lawPath} className="text-primary font-semibold">{SITE.lawLabel}</Link>
       </div>
-      <p className="text-xs text-secondary/80 mt-3">
-        {SITE.dataCreditShort}{updated ? ` | Nevada 511 report ${updated} PT` : ""}
-      </p>
     </section>
   );
 }

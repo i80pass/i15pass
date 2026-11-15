@@ -42,18 +42,21 @@ export default async function HomePage() {
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface max-w-3xl">
         I-15 road conditions, live: Las Vegas to both state lines
       </h1>
-      <p className="answer-first text-body-lg text-secondary mt-3 max-w-3xl leading-relaxed">
-        {anyClosed
-          ? "At least one stretch of I-15 on this corridor is closed right now according to Nevada 511. The verdicts below say which, and why, before you start the car."
-          : "Las Vegas, the run south to Primm and the California line, the climb over Mountain Pass, and Mesquite into the Virgin River Gorge, each with a live verdict, its posted restrictions, and its cameras in driving order, all read from Nevada 511."}
-      </p>
-      <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
 
-      <div className="grid gap-4 mt-8">
+      {/* Verdict first, the master order: the colored verdict boxes lead,
+          directly under the H1; the intro paragraph and credit follow. */}
+      <div className="grid gap-4 mt-6">
         {CORRIDORS.map((c, i) => (
           <StatusBanner key={c.slug} corridor={c} status={statuses[i]} />
         ))}
       </div>
+
+      <p className="answer-first text-body-lg text-secondary mt-8 max-w-3xl leading-relaxed">
+        {anyClosed
+          ? "At least one stretch of I-15 on this corridor is closed right now according to Nevada 511. The verdicts above say which, and why, before you start the car."
+          : "Las Vegas, the run south to Primm and the California line, the climb over Mountain Pass, and Mesquite into the Virgin River Gorge, each with a live verdict, its posted restrictions, and its cameras in driving order, all read from Nevada 511."}
+      </p>
+      <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
 
       <section className="mt-12">
         <div className="flex items-baseline justify-between mb-4">

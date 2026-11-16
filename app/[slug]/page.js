@@ -228,10 +228,6 @@ async function PrimmPage({ corridor }) {
         <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">What Nevada 511 is posting on this stretch</h2>
         <StatusBanner corridor={corridor} status={status} heading={`${corridor.name} right now`} />
       </section>
-      <SegmentsList segments={status.segments} />
-      <StationTable stations={myStations} />
-      <EventList events={status.events} />
-
       <section className="mt-10">
         <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Corridor checkpoints</h2>
         <div className="grid md:grid-cols-2 gap-3">
@@ -243,6 +239,10 @@ async function PrimmPage({ corridor }) {
           ))}
         </div>
       </section>
+
+      <SegmentsList segments={status.segments} />
+      <StationTable stations={myStations} />
+      <EventList events={status.events} />
 
       <EditorialSections sections={corridor.sections} />
 
@@ -286,10 +286,6 @@ async function CorridorPage({ corridor }) {
       <div className="mt-5">
         <StatusBanner corridor={corridor} status={status} heading={`${corridor.name} right now`} />
       </div>
-      {corridor.intro.map((p, i) => (
-        <p key={i} className="text-sm md:text-base text-secondary leading-relaxed mt-5 max-w-3xl">{p}</p>
-      ))}
-
       <section className="mt-8">
         <div className="flex items-baseline justify-between mb-3">
           <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
@@ -311,11 +307,6 @@ async function CorridorPage({ corridor }) {
           Renders nothing until AdSense is activated (AdSlot gate). */}
       <AdSlot slot="belowCameras" />
 
-      <SegmentsList segments={status.segments} agency={corridor.agency} credit={corridor.dataCreditShort} />
-      <StationTable stations={myStations} />
-      <SummitWeather corridor={corridor} />
-      <EventList events={status.events} agency={corridor.agency} credit={corridor.dataCreditShort} />
-
       <section className="mt-10">
         <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Corridor checkpoints</h2>
         <div className="grid md:grid-cols-2 gap-3">
@@ -327,6 +318,15 @@ async function CorridorPage({ corridor }) {
           ))}
         </div>
       </section>
+
+      <SegmentsList segments={status.segments} agency={corridor.agency} credit={corridor.dataCreditShort} />
+      <StationTable stations={myStations} />
+      <SummitWeather corridor={corridor} />
+      <EventList events={status.events} agency={corridor.agency} credit={corridor.dataCreditShort} />
+
+      {corridor.intro.map((p, i) => (
+        <p key={i} className="text-sm md:text-base text-secondary leading-relaxed mt-5 max-w-3xl">{p}</p>
+      ))}
 
       <EditorialSections sections={corridor.sections} />
 
@@ -365,6 +365,9 @@ async function StripPage({ corridor }) {
         cameraListSchema(cameras, corridor.name),
       ]} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{corridor.name} cameras</h1>
+      <div className="mt-6">
+        <CameraGrid cameras={display} />
+      </div>
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
         Every {corridor.agency || "Nevada 511"} camera on {corridor.routeLabel} through {corridor.name}, sequenced in driving order from{" "}
         {corridor.fromTo.split(" to ")[0]} to {corridor.fromTo.split(" to ").slice(1).join(" to ") || corridor.summit.name}.
@@ -372,9 +375,6 @@ async function StripPage({ corridor }) {
         Each frame opens its own page with the local notes for that spot.
       </p>
       <p className="text-sm text-secondary mt-2">{corridor.statusSource === "caltrans" ? "Camera data: Caltrans District 8. Images refresh about every minute at the source." : SITE.dataCredit}</p>
-      <div className="mt-6">
-        <CameraGrid cameras={display} />
-      </div>
       <p className="mt-8 text-sm">
         <Link href={`/${corridor.slug}`} className="font-bold text-primary">Back to {corridor.name} conditions</Link>
       </p>
@@ -477,7 +477,6 @@ async function RoutePage({ route }) {
         faqSchema(route.slug === "las-vegas-to-los-angeles" ? [...route.faqs, ...STATELINE_FAQS] : route.faqs),
       ]} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{route.name}</h1>
-      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{route.intro}</p>
       <p className="text-sm text-secondary mt-2">{route.miles} miles | {route.driveTime} | {SITE.dataCreditShort}</p>
       {route.slug === "las-vegas-to-los-angeles" && (
         <div className="mt-6">
@@ -502,6 +501,7 @@ async function RoutePage({ route }) {
           </Link>
         )}
       </section>
+      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{route.intro}</p>
       <div className="mt-10 space-y-9">
         {route.segments.map((s) => (
           <section key={s.heading}>
@@ -526,7 +526,6 @@ async function ComparePage({ compare }) {
         faqSchema(compare.faqs),
       ]} />
       <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{compare.title}</h1>
-      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{compare.intro}</p>
       <div className="grid gap-4 mt-7">
         {corridors.map((c, i) => (
           <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
@@ -559,6 +558,8 @@ async function ComparePage({ compare }) {
           </table>
         </div>
       </section>
+      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{compare.intro}</p>
+
       <div className="mt-9 space-y-4 max-w-3xl">
         {compare.body.map((p, i) => (
           <p key={i} className="text-sm md:text-base text-secondary leading-relaxed">{p}</p>

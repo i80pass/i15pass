@@ -52,13 +52,6 @@ export default async function HomePage() {
         ))}
       </div>
 
-      <p className="answer-first text-body-lg text-secondary mt-8 max-w-3xl leading-relaxed">
-        {anyClosed
-          ? "At least one stretch of I-15 on this corridor is closed right now according to Nevada 511. The verdicts above say which, and why, before you start the car."
-          : "Las Vegas, the run south to Primm and the California line, the climb over Mountain Pass, and Mesquite into the Virgin River Gorge, each with a live verdict, its posted restrictions, and its cameras in driving order, all read from Nevada 511."}
-      </p>
-      <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
-
       <section className="mt-12">
         <div className="flex items-baseline justify-between mb-4">
           <h2 className="text-xl md:text-2xl font-bold text-on-surface">Las Vegas cameras</h2>
@@ -103,6 +96,17 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="mt-12 glass-card rounded-2xl p-4 md:p-5">
+        <h2 className="text-headline-sm text-on-surface mb-2">Nevada chain and wind rules, in plain English</h2>
+        <p className="text-sm md:text-base text-secondary leading-relaxed">
+          Nevada does not run a numbered chain ladder. NDOT posts requirements in plain language, chains or
+          snow tires where a storm demands it, and wind restrictions for high profile vehicles when the desert
+          blows, and the posting itself is the law of the road for that stretch. Our rules page carries what
+          each posted phrase requires, next to the live postings for every stretch of this corridor.
+        </p>
+        <Link href={SITE.lawPath} className="inline-block mt-3 text-sm font-bold text-primary">Read the Nevada rules page</Link>
+      </section>
+
       <section className="mt-12">
         <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Weather where you are</h2>
         <div className="flex flex-wrap gap-2">
@@ -114,16 +118,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mt-12 glass-card rounded-2xl p-4 md:p-5">
-        <h2 className="text-headline-sm text-on-surface mb-2">Nevada chain and wind rules, in plain English</h2>
-        <p className="text-sm md:text-base text-secondary leading-relaxed">
-          Nevada does not run a numbered chain ladder. NDOT posts requirements in plain language, chains or
-          snow tires where a storm demands it, and wind restrictions for high profile vehicles when the desert
-          blows, and the posting itself is the law of the road for that stretch. Our rules page carries what
-          each posted phrase requires, next to the live postings for every stretch of this corridor.
-        </p>
-        <Link href={SITE.lawPath} className="inline-block mt-3 text-sm font-bold text-primary">Read the Nevada rules page</Link>
-      </section>
+      <p className="answer-first text-body-lg text-secondary mt-8 max-w-3xl leading-relaxed">
+        {anyClosed
+          ? "At least one stretch of I-15 on this corridor is closed right now according to Nevada 511. The verdicts above say which, and why, before you start the car."
+          : "Las Vegas, the run south to Primm and the California line, the climb over Mountain Pass, and Mesquite into the Virgin River Gorge, each with a live verdict, its posted restrictions, and its cameras in driving order, all read from Nevada 511."}
+      </p>
+      <p className="text-sm text-secondary mt-2">{SITE.dataCredit}</p>
 
       <FaqBlock faqs={HOME_FAQS} />
 

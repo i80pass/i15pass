@@ -27,6 +27,9 @@ export function generateMetadata() {
     title,
     description,
     icons: { icon: "/apple-touch-icon.png", apple: "/apple-touch-icon.png" },
+    manifest: "/manifest.webmanifest",
+    appleWebApp: { capable: true, statusBarStyle: "default", title: "i15pass" },
+    other: { "apple-mobile-web-app-capable": "yes" },
     openGraph: { title, description, siteName: SITE.name, type: "website", images: ["/og-image.png"] },
     twitter: { card: "summary_large_image", title, description, images: ["/og-image.png"] },
   };
@@ -37,7 +40,7 @@ export function generateMetadata() {
   return meta;
 }
 
-export const viewport = { width: "device-width", initialScale: 1 };
+export const viewport = { width: "device-width", initialScale: 1, themeColor: "#003a63" };
 
 export default function RootLayout({ children }) {
   const gaId = SITE.gaId;

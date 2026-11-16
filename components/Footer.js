@@ -51,6 +51,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-white/10 px-container-padding-mobile md:px-container-padding-desktop py-4 text-xs text-white/50 flex flex-wrap gap-3 justify-between">
         <span>{SITE.name} is a {SITE.parentName} site.</span>
+        <a href="https://brightreddesign.com/family" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Our Family of Companies</a>
         <span>{SITE.dataCreditShort} | Weather: National Weather Service</span>
       </div>
       <div className="px-container-padding-mobile md:px-container-padding-desktop pb-6">

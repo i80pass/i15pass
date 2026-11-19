@@ -91,10 +91,25 @@ for (const c of CORRIDORS) {
     const m = mid(decodePolyline(s.EncodedPolyline));
     return named(s.RoadwayName || "", c.roadwayIncludes) && inBbox(m, c.bbox);
   });
-  const events = (eventsRaw || []).filter((e) => inBbox({ lat: e.Latitude, lon: e.Longitude }, c.bbox));
+  // Event matching mirrors lib/ndot.js corridorEvents (roadway name
+  // plus the polyline midpoint inside the corridor box), with the
+  // event point inside the box accepted as well, so an event the live
+  // verdict counts is never invisible to this logger.
+  const events = (eventsRaw || []).filter((e) => {
+    if (inBbox({ lat: e.Latitude, lon: e.Longitude }, c.bbox)) return true;
+    if (!named(e.RoadwayName || "", c.roadwayIncludes)) return false;
+    return inBbox(mid(decodePolyline(e.EncodedPolyline)), c.bbox);
+  });
+  // Same closure test as lib/ndot.js isFullClosure: the IsFullClosure
+  // flag OR a closure event type or subtype, so a closure NDOT posts
+  // by type alone (no flag) still outranks any posted restriction
+  // here, exactly the way it does in the live corridor verdict.
+  // (Before Nov 19, 2026 this tested only the flag and the words
+  // "full closure" in EventType, and matched events by point only.)
   const closed =
     segments.some((s) => /closed/i.test(text(s["Overall Status"]))) ||
-    events.some((e) => e.IsFullClosure === true || /full closure/i.test(text(e.EventType)));
+    events.some((e) => e.IsFullClosure === true ||
+      `${e.EventType || ""} ${e.EventSubType || ""}`.toLowerCase().includes("closure"));
   const restriction = restrictionOf(segments);
   const stateKey = `${closed ? "closed" : "open"}|${restriction || "none"}`;
   const prev = [...history.entries].reverse().find((e) => e.corridor === c.slug);

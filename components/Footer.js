@@ -70,6 +70,8 @@ export default function Footer() {
             <a href="https://mammothpass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">mammothpass.com</a>
             <a href="https://coquihallalive.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">coquihallalive.com</a>
             <a href="https://i17pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i17pass.com</a>
+            <a href="https://thruwaypass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">thruwaypass.com</a>
+            <a href="https://i40pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i40pass.com</a>
           </div>
         </div>
       </div>

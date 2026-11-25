@@ -1,6 +1,5 @@
 import Link from "next/link";
 import StatusBanner from "@/components/StatusBanner";
-import CameraGrid from "@/components/CameraGrid";
 import FaqBlock from "@/components/FaqBlock";
 import StormAlerts from "@/components/StormAlerts";
 import AdSlot from "@/components/AdSlot";
@@ -9,9 +8,8 @@ import { SITE } from "@/lib/site-config";
 import { CORRIDORS, statusCorridor } from "@/lib/corridors";
 import { TOWNS } from "@/lib/towns";
 import { ROUTES } from "@/lib/routes-data";
-import { getCorridorStatus, getCorridorCameras } from "@/lib/ndot";
+import { getCorridorStatus } from "@/lib/ndot";
 import { webPageSchema, webSiteSchema, faqSchema, roadConditionSchema } from "@/lib/schema";
-import { displayCameras } from "@/lib/sample-cameras";
 
 export const revalidate = 120;
 
@@ -29,7 +27,6 @@ const HOME_FAQS = [
 
 export default async function HomePage() {
   const statuses = await Promise.all(CORRIDORS.map((c) => getCorridorStatus(statusCorridor(c))));
-  const vegasCameras = await getCorridorCameras(CORRIDORS[0]);
   const anyClosed = statuses.some((s) => s.live && s.closed);
 
   return (
@@ -52,24 +49,6 @@ export default async function HomePage() {
           <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
         ))}
       </div>
-
-      <section className="mt-12">
-        <div className="flex items-baseline justify-between mb-4">
-          <h2 className="text-xl md:text-2xl font-bold text-on-surface">Las Vegas cameras</h2>
-          <Link href="/las-vegas-cameras" className="text-sm font-bold text-primary">All Las Vegas cameras</Link>
-        </div>
-        <CameraGrid cameras={displayCameras(CORRIDORS[0], vegasCameras).slice(0, 3)} />
-        <Link
-          href="/las-vegas-cameras"
-          className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-        >
-          <span className="material-symbols-outlined text-[18px]">videocam</span>
-          SEE ALL WEBCAMS
-        </Link>
-        {vegasCameras.length > 0 && (
-          <p className="text-xs text-secondary mt-2">{SITE.dataCreditShort}. Stills refresh about every minute at the source.</p>
-        )}
-      </section>
 
       {/* Ad slot 1 of 2: below the webcams.
           Renders nothing until AdSense is activated (AdSlot gate). */}

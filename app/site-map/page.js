@@ -52,6 +52,8 @@ export default function SitemapPage() {
           { href: "/live-feed", label: "Live feed" },
           { href: "/alerts", label: "Alerts" },
           { href: "/closures", label: "Closures" },
+          { href: "/chains", label: "Chain controls" },
+          { href: "/cameras", label: "Cajon Pass cameras" },
           { href: "/status-history", label: "Status history" },
         ]}
       />

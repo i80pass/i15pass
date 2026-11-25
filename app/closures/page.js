@@ -72,8 +72,9 @@ export default async function ClosuresPage() {
           waiting it out or the long way around through US-95 and I-40, hours longer; the Jean and Primm exits are
           the last services before the desert either way. North toward Utah, a Gorge closure has no detour at all
           inside the canyon: the old road through Littlefield and Beaver Dam is the way around when it is passable,
-          and St. George traffic can also leave I-15 at Mesquite. In both directions, the cameras on the corridor
-          pages show the queue before you are in it.
+          and St. George traffic can also leave I-15 at Mesquite. On the California side, the{" "}
+          <Link href="/cameras" className="font-bold text-primary">Cajon Pass cameras</Link> show the grade and
+          its queue before you are in it.
         </p>
       </section>
     </main>

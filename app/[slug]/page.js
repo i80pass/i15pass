@@ -276,6 +276,9 @@ async function CorridorPage({ corridor }) {
         <section className="mt-8">
           <div className="flex items-baseline justify-between mb-3">
             <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
+            {corridor.statusSource === "caltrans" && (
+              <Link href="/cameras" className="text-sm font-bold text-primary">See all Cajon Pass cameras</Link>
+            )}
           </div>
           <CameraGrid cameras={cameras.slice(0, cameras.length > 5 ? 3 : 6)} />
         </section>
@@ -319,6 +322,9 @@ async function CorridorPage({ corridor }) {
           })}
           {corridor.slug === "las-vegas" && (
             <Link href="/las-vegas-strip-camera-tour" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Strip camera tour</Link>
+          )}
+          {corridor.slug === "cajon-pass" && (
+            <Link href="/cameras" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Cajon Pass cameras</Link>
           )}
           <Link href="/status-history" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Status history</Link>
         </div>
@@ -443,6 +449,9 @@ async function RoutePage({ route }) {
         <section className="mt-9">
           <h2 className="text-xl font-bold text-on-surface mb-3">Cameras along the way</h2>
           <CameraGrid cameras={cameras.length > 5 ? cameras.slice(0, 3) : cameras} showCorridor />
+          {route.corridors.includes("cajon-pass") && (
+            <p className="mt-3 text-sm"><Link href="/cameras" className="font-bold text-primary">See all Cajon Pass cameras</Link></p>
+          )}
         </section>
       )}
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{route.intro}</p>

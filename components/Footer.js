@@ -73,6 +73,9 @@ export default function Footer() {
             <a href="https://thruwaypass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">thruwaypass.com</a>
             <a href="https://i40pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i40pass.com</a>
             <a href="https://i70pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i70pass.com</a>
+            <a href="https://i77pass.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">i77pass.com</a>
+            <a href="https://whitepasslive.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">whitepasslive.com</a>
+            <a href="https://rogerspasslive.com" className="block text-[13px] leading-5 py-1.5 text-white/50 hover:text-white transition-colors border-b border-white/10 [&:nth-last-child(-n+2)]:border-b-0">rogerspasslive.com</a>
           </div>
         </div>
       </div>

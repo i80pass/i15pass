@@ -17,7 +17,6 @@ import CorridorNav from "@/components/CorridorNav";
 // stays in CorridorNav, rendered under the brand row inside this
 // fixed header element, as before.
 const LINKS = [
-  { href: "/cameras", label: "Cameras" },
   { href: "/las-vegas-strip-camera-tour", label: "Strip Tour" },
   { href: SITE.lawPath, label: "Chain Rules" },
   { href: "/live-feed", label: "Live Feed" },

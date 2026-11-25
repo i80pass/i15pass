@@ -75,6 +75,9 @@ export default function Footer() {
           </div>
         </div>
       </div>
+      <div style={{ textAlign: "center", fontSize: "12px", opacity: 0.75, padding: "10px 16px 14px" }}>
+        Bright Red Design LLC &middot; Nevada Business License NV20260015334
+      </div>
     </footer>
   );
 }

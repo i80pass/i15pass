@@ -23,10 +23,12 @@ export default function AboutPage() {
           evacuations, and they deserved a page each, built around the answer.
         </p>
         <p className="text-sm md:text-base text-secondary leading-relaxed">
-          Every verdict, posting, and camera on this site comes from Nevada 511, the Nevada Department of
-          Transportation's traveler information service, read live from NDOT's developer feed and credited on
-          every page. The weather comes from the National Weather Service. What this site adds is organization:
-          the corridor cut into the stretches drivers actually think in, cameras sequenced in driving order,
+          Every verdict and posting on this site comes from Nevada 511, the Nevada Department of
+          Transportation's traveler information service, read live from the public Nevada 511 lists and credited
+          on every page. The only cameras on this site are the Caltrans cameras in Cajon Pass, sequenced in
+          driving order: NDOT does not license its camera images for use, so no Nevada camera stills appear
+          here. The weather comes from the National Weather Service. What this site adds is organization:
+          the corridor cut into the stretches drivers actually think in,
           postings carried in NDOT's own words next to plain English explanations, alerts from both agencies side
           by side, and a public status history that never edits itself.
         </p>

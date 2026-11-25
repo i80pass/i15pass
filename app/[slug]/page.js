@@ -15,7 +15,6 @@ import { COMPARES, getCompare } from "@/lib/compare";
 import { getCorridorStatus, getCorridorCameras, getWeatherStations, corridorStations, parseF, cleanEvent } from "@/lib/ndot";
 import { getTownWeather, getWeatherAlerts, getPointWeather, getPointAlerts } from "@/lib/weather";
 import { webPageSchema, faqSchema, roadConditionSchema, cameraListSchema, placeSchema, breadcrumbSchema } from "@/lib/schema";
-import { displayCameras } from "@/lib/sample-cameras";
 import { STATELINE_FAQS } from "@/lib/stateline-faqs";
 
 export const revalidate = 120;
@@ -24,10 +23,6 @@ export const dynamicParams = false;
 function resolve(slug) {
   const corridor = CORRIDORS.find((c) => c.slug === slug);
   if (corridor) return { kind: "corridor", corridor };
-  if (slug.endsWith("-cameras")) {
-    const c = CORRIDORS.find((x) => x.slug === slug.slice(0, -"-cameras".length));
-    if (c) return { kind: "strip", corridor: c };
-  }
   if (slug.endsWith("-weather")) {
     const t = getTown(slug.slice(0, -"-weather".length));
     if (t) return { kind: "town", town: t };
@@ -42,7 +37,6 @@ function resolve(slug) {
 export function generateStaticParams() {
   return [
     ...CORRIDORS.map((c) => ({ slug: c.slug })),
-    ...CORRIDORS.map((c) => ({ slug: `${c.slug}-cameras` })),
     ...TOWNS.map((t) => ({ slug: `${t.slug}-weather` })),
     ...ROUTES.map((r) => ({ slug: r.slug })),
     ...COMPARES.map((c) => ({ slug: c.slug })),
@@ -59,14 +53,6 @@ export async function generateMetadata({ params }) {
       title: `${c.name} Road Conditions and Cameras | ${c.routeLabel} Live`,
       description: `Live ${c.name} (${c.routeLabel}) road conditions, ${c.agency || "Nevada 511"} cameras in driving order, posted restrictions, and weather from ${c.fromTo}.`,
       alternates: { canonical: `/${c.slug}` },
-    };
-  }
-  if (r.kind === "strip") {
-    const c = r.corridor;
-    return {
-      title: `${c.name} Cameras in Driving Order | ${c.routeLabel}`,
-      description: `Every ${c.agency || "Nevada 511"} camera on ${c.name} (${c.routeLabel}), sequenced in driving order, each with its own page.`,
-      alternates: { canonical: `/${c.slug}-cameras` },
     };
   }
   if (r.kind === "town") {
@@ -126,7 +112,7 @@ function SegmentsList({ segments, agency, credit }) {
           </div>
         ))}
       </div>
-      <p className="text-xs text-secondary mt-2">{agency ? `Posted in Caltrans' own words, from the Caltrans District 8 feed. ${credit}.` : `Posted in NDOT's own words by Nevada 511. ${SITE.dataCreditShort}.`}</p>
+      <p className="text-xs text-secondary mt-2">{agency ? `Posted in Caltrans' own words, from the Caltrans District 8 feed. ${credit}.` : `Posted in NDOT's own words by Nevada 511. Conditions courtesy NDOT and Nevada 511.`}</p>
     </section>
   );
 }
@@ -286,22 +272,14 @@ async function CorridorPage({ corridor }) {
       <div className="mt-5">
         <StatusBanner corridor={corridor} status={status} heading={`${corridor.name} right now`} />
       </div>
-      <section className="mt-8">
-        <div className="flex items-baseline justify-between mb-3">
-          <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
-          <Link href={`/${corridor.slug}-cameras`} className="text-sm font-bold text-primary">Full camera strip</Link>
-        </div>
-        <CameraGrid cameras={displayCameras(corridor, cameras).slice(0, cameras.length > 5 ? 3 : 6)} />
-        {cameras.length > 5 && (
-          <Link
-            href={`/${corridor.slug}-cameras`}
-            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-          >
-            <span className="material-symbols-outlined text-[18px]">videocam</span>
-            SEE ALL WEBCAMS
-          </Link>
-        )}
-      </section>
+      {cameras.length > 0 && (
+        <section className="mt-8">
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
+          </div>
+          <CameraGrid cameras={cameras.slice(0, cameras.length > 5 ? 3 : 6)} />
+        </section>
+      )}
 
       {/* Ad slot 1 of 2: below the webcams.
           Renders nothing until AdSense is activated (AdSlot gate). */}
@@ -351,33 +329,6 @@ async function CorridorPage({ corridor }) {
       {/* Ad slot 2 of 2: lower page, above the footer.
           Renders nothing until AdSense is activated (AdSlot gate). */}
       <AdSlot slot="lowerPage" />
-    </main>
-  );
-}
-
-async function StripPage({ corridor }) {
-  const cameras = await getCorridorCameras(corridor);
-  const display = displayCameras(corridor, cameras);
-  return (
-    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
-      <JsonLd data={[
-        webPageSchema({ path: `/${corridor.slug}-cameras`, title: `${corridor.name} Cameras`, description: `Every ${corridor.agency || "Nevada 511"} camera on ${corridor.name}, in driving order.` }),
-        cameraListSchema(cameras, corridor.name),
-      ]} />
-      <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{corridor.name} cameras</h1>
-      <div className="mt-6">
-        <CameraGrid cameras={display} />
-      </div>
-      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">
-        Every {corridor.agency || "Nevada 511"} camera on {corridor.routeLabel} through {corridor.name}, sequenced in driving order from{" "}
-        {corridor.fromTo.split(" to ")[0]} to {corridor.fromTo.split(" to ").slice(1).join(" to ") || corridor.summit.name}.
-        Read them in sequence and you can watch traffic build, weather change, and queues form before you drive into them.
-        Each frame opens its own page with the local notes for that spot.
-      </p>
-      <p className="text-sm text-secondary mt-2">{corridor.statusSource === "caltrans" ? "Camera data: Caltrans District 8. Images refresh about every minute at the source." : SITE.dataCredit}</p>
-      <p className="mt-8 text-sm">
-        <Link href={`/${corridor.slug}`} className="font-bold text-primary">Back to {corridor.name} conditions</Link>
-      </p>
     </main>
   );
 }
@@ -469,7 +420,7 @@ async function RoutePage({ route }) {
   const corridors = CORRIDORS.filter((c) => route.corridors.includes(c.slug));
   const statuses = await Promise.all(corridors.map((c) => getCorridorStatus(statusCorridor(c))));
   const camSets = await Promise.all(corridors.map((c) => getCorridorCameras(c)));
-  const cameras = corridors.flatMap((c, i) => displayCameras(c, camSets[i])).slice(0, 9);
+  const cameras = corridors.flatMap((c, i) => camSets[i]).slice(0, 9);
   return (
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
       <JsonLd data={[
@@ -488,19 +439,12 @@ async function RoutePage({ route }) {
           <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
         ))}
       </div>
-      <section className="mt-9">
-        <h2 className="text-xl font-bold text-on-surface mb-3">Cameras along the way</h2>
-        <CameraGrid cameras={cameras.length > 5 ? cameras.slice(0, 3) : cameras} showCorridor />
-        {cameras.length > 5 && (
-          <Link
-            href="/cameras"
-            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-          >
-            <span className="material-symbols-outlined text-[18px]">videocam</span>
-            SEE ALL WEBCAMS
-          </Link>
-        )}
-      </section>
+      {cameras.length > 0 && (
+        <section className="mt-9">
+          <h2 className="text-xl font-bold text-on-surface mb-3">Cameras along the way</h2>
+          <CameraGrid cameras={cameras.length > 5 ? cameras.slice(0, 3) : cameras} showCorridor />
+        </section>
+      )}
       <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{route.intro}</p>
       <div className="mt-10 space-y-9">
         {route.segments.map((s) => (
@@ -575,7 +519,6 @@ export default async function SlugPage({ params }) {
   const r = resolve(slug);
   if (!r) notFound();
   if (r.kind === "corridor") return <CorridorPage corridor={r.corridor} />;
-  if (r.kind === "strip") return <StripPage corridor={r.corridor} />;
   if (r.kind === "town") return <TownPage town={r.town} />;
   if (r.kind === "route") return <RoutePage route={r.route} />;
   return <ComparePage compare={r.compare} />;

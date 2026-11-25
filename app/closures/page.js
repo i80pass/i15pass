@@ -60,7 +60,7 @@ export default async function ClosuresPage() {
               </p>
             )}
             <p className="mt-3 text-sm">
-              <Link href={`/${corridor.slug}`} className="font-bold text-primary">{corridor.name} conditions and cameras</Link>
+              <Link href={`/${corridor.slug}`} className="font-bold text-primary">{corridor.name} conditions</Link>
             </p>
           </section>
         ))}

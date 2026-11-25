@@ -14,7 +14,6 @@ import { SITE } from "@/lib/site-config";
 // not in the font and printed as raw words on phones.
 const LINKS = [
   { href: "/", label: "Home", icon: "home" },
-  { href: "/cameras", label: "Cameras", icon: "camera_outdoor" },
   { href: "/live-feed", label: "Live", icon: "videocam" },
   { href: "/alerts", label: "Alerts", icon: "notifications" },
   { href: SITE.lawPath, label: "Rules", icon: "ac_unit" },

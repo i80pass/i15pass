@@ -63,7 +63,6 @@ export default function StatusBanner({ corridor, status, heading, href = null })
       )}
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 text-label-md text-secondary">
         <Link href={`/${corridor.slug}`} className="inline-flex items-center min-h-[48px] text-primary font-semibold">Full corridor page</Link>
-        <Link href={`/${corridor.slug}-cameras`} className="inline-flex items-center min-h-[48px] text-primary font-semibold">Cameras in driving order</Link>
         {!corridor.hideLawLink && (
           <Link href={SITE.lawPath} className="inline-flex items-center min-h-[48px] text-primary font-semibold">{SITE.lawLabel}</Link>
         )}

@@ -6,7 +6,6 @@ import { TOWNS } from "@/lib/towns";
 import { ROUTES } from "@/lib/routes-data";
 import { COMPARES } from "@/lib/compare";
 import { webPageSchema } from "@/lib/schema";
-import snapshot from "@/lib/ndot-cameras.json";
 
 export const metadata = {
   title: "Sitemap | i15pass",
@@ -35,13 +34,6 @@ function Section({ title, links }) {
 }
 
 export default function SitemapPage() {
-  const cameraLinks = (snapshot.cameras || []).flatMap((cam) =>
-    (cam.views || []).map((v) => ({
-      href: `/camera/${v.id}`,
-      label: cam.name || v.name || `Camera ${v.id}`,
-    }))
-  );
-
   return (
     <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
       <JsonLd data={webPageSchema({ path: "/site-map", title: metadata.title, description: metadata.description })} />
@@ -57,7 +49,6 @@ export default function SitemapPage() {
         title="Start Here"
         links={[
           { href: "/", label: "Home" },
-          { href: "/cameras", label: "All cameras" },
           { href: "/live-feed", label: "Live feed" },
           { href: "/alerts", label: "Alerts" },
           { href: "/closures", label: "Closures" },
@@ -69,7 +60,6 @@ export default function SitemapPage() {
         title="The I-15 Corridor"
         links={[
           ...CORRIDORS.map((c) => ({ href: `/${c.slug}`, label: `${c.routeLabel} ${c.name}` })),
-          ...CORRIDORS.map((c) => ({ href: `/${c.slug}-cameras`, label: `${c.name} cameras` })),
           { href: "/las-vegas-strip-camera-tour", label: "Las Vegas Strip camera tour" },
           { href: SITE.lawPath, label: SITE.lawLabel },
         ]}
@@ -89,8 +79,6 @@ export default function SitemapPage() {
         title="Weather by Town"
         links={TOWNS.map((t) => ({ href: `/${t.slug}-weather`, label: `${t.name} weather` }))}
       />
-
-      <Section title="Cameras" links={cameraLinks} />
 
       <Section
         title="Guides and More"

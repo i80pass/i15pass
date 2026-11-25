@@ -22,6 +22,7 @@ export default function Footer() {
               <li key={c.slug}><Link href={`/${c.slug}`} className="hover:text-white">{c.routeLabel} {c.name}</Link></li>
             ))}
             <li><Link href="/las-vegas-strip-camera-tour" className="hover:text-white">Las Vegas Strip camera tour</Link></li>
+            <li><Link href="/cameras" className="hover:text-white">Cajon Pass cameras</Link></li>
             <li><Link href={SITE.lawPath} className="hover:text-white">{SITE.lawLabel}</Link></li>
             <li><Link href="/storm-archive" className="hover:text-white">Storm archive</Link></li>
             <li><Link href="/storm-playbook" className="hover:text-white">Storm day playbook</Link></li>

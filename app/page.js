@@ -2,6 +2,7 @@ import Link from "next/link";
 import StatusBanner from "@/components/StatusBanner";
 import CameraGrid from "@/components/CameraGrid";
 import FaqBlock from "@/components/FaqBlock";
+import StormAlerts from "@/components/StormAlerts";
 import AdSlot from "@/components/AdSlot";
 import JsonLd from "@/components/JsonLd";
 import { SITE } from "@/lib/site-config";
@@ -117,6 +118,10 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <div className="mt-12">
+        <StormAlerts />
+      </div>
 
       <p className="answer-first text-body-lg text-secondary mt-8 max-w-3xl leading-relaxed">
         {anyClosed

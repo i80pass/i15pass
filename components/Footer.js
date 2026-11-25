@@ -38,7 +38,6 @@ export default function Footer() {
         <nav>
           <p className="font-bold mb-3 text-sm uppercase tracking-wide">Site</p>
           <ul className="space-y-2 text-sm text-white/80">
-            <li><Link href="/cameras" className="hover:text-white">All cameras</Link></li>
             <li><Link href="/live-feed" className="hover:text-white">Live feed</Link></li>
             <li><Link href="/alerts" className="hover:text-white">Alerts</Link></li>
             <li><Link href="/widget" className="hover:text-white">Get the live widget</Link></li>

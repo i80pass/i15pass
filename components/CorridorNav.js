@@ -10,7 +10,10 @@ import { CORRIDORS } from "@/lib/corridors";
 // that works before hydration and on a weak signal, one horizontal
 // sliding row at every width, and a 48px minimum tap target on every
 // pill. Same hrefs, same order, and same labels as the inline bar it
-// replaces, so no internal link changes. Active rule: a corridor
+// replaces. Nov 25, 2026: a Cajon Pass Cameras pill was added after
+// the corridor pills, pointing at the /cameras index (the site's only
+// camera index), active on /cameras and the /camera detail pages.
+// Active rule: a corridor
 // pill is active on its own page and on its camera strip page
 // (href plus "-cameras"), the first corridor pill is active on the
 // homepage, and the Closures and Compare pills are active only on
@@ -23,6 +26,7 @@ export default function CorridorNav() {
       label: `${c.routeLabel} ${c.shortName}`,
       corridor: true,
     })),
+    { href: "/cameras", label: "Cajon Pass Cameras", corridor: false, cameras: true },
     { href: "/closures", label: "Closures", corridor: false },
     { href: "/chains", label: "Chain Controls", corridor: false },
     { href: "/compare", label: "Compare the Drives", corridor: false },
@@ -33,6 +37,7 @@ export default function CorridorNav() {
         {entries.map((e) => {
           const active =
             pathname === e.href ||
+            (e.cameras && (pathname === "/cameras" || pathname.startsWith("/camera/"))) ||
             (e.corridor && pathname === `${e.href}-cameras`) ||
             (pathname === "/" && e.href === `/${CORRIDORS[0].slug}`);
           return (

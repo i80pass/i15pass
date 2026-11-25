@@ -24,6 +24,7 @@ export default function CorridorNav() {
       corridor: true,
     })),
     { href: "/closures", label: "Closures", corridor: false },
+    { href: "/chains", label: "Chain Controls", corridor: false },
     { href: "/compare", label: "Compare the Drives", corridor: false },
   ];
   return (

@@ -3,6 +3,7 @@ import { CORRIDORS } from "@/lib/corridors";
 import { TOWNS } from "@/lib/towns";
 import { ROUTES } from "@/lib/routes-data";
 import { COMPARES } from "@/lib/compare";
+import { getAllCaltransCameras } from "@/lib/caltrans";
 
 // The sitemap lists every indexable page. Embed routes are deliberately
 // excluded: they are noindex partner widgets (the idahopass lesson, where
@@ -14,6 +15,9 @@ export default function sitemap() {
     "/live-feed",
     "/alerts",
     "/closures",
+    "/chains",
+    "/cameras",
+    ...getAllCaltransCameras().map((c) => `/camera/${c.views[0].id}`),
     "/status-history",
     "/storm-archive",
     "/storm-playbook",

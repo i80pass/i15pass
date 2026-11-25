@@ -38,8 +38,7 @@ export default function AboutPage() {
         <p className="text-sm md:text-base text-secondary leading-relaxed">
           {SITE.name} is part of a small network of pass and corridor condition sites run by Bright Red Design.
           The whole family is listed on the <a href={SITE.networkUrl} className="font-bold text-primary">Our pass network</a> page.
-          Start anywhere: the <Link href="/" className="font-bold text-primary">homepage verdicts</Link>, the{" "}
-          <Link href="/cameras" className="font-bold text-primary">camera index</Link>, or the{" "}
+          Start anywhere: the <Link href="/" className="font-bold text-primary">homepage verdicts</Link> or the{" "}
           <Link href="/las-vegas-strip-camera-tour" className="font-bold text-primary">Strip camera tour</Link>.
         </p>
       </div>

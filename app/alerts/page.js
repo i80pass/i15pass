@@ -5,8 +5,7 @@ import { getAlerts, cleanText } from "@/lib/ndot";
 import { getWeatherAlerts } from "@/lib/weather";
 import { webPageSchema } from "@/lib/schema";
 
-export const revalidate = 300;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "I-15 Alerts | Nevada 511 Alerts and Weather Warnings",
   description: "Active Nevada 511 alerts for the I-15 corridor and National Weather Service warnings for Las Vegas, Mesquite, Barstow, and St. George, in one place.",

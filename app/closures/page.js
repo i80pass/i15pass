@@ -5,8 +5,7 @@ import { CORRIDORS, statusCorridor } from "@/lib/corridors";
 import { getCorridorStatus, cleanEvent } from "@/lib/ndot";
 import { webPageSchema } from "@/lib/schema";
 
-export const revalidate = 120;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "I-15 Road Closures | Las Vegas to Barstow and St. George",
   description: "Current full closures on I-15 between Las Vegas, Primm, Mountain Pass, Mesquite, the Virgin River Gorge, and Cajon Pass, read live from Nevada 511 and Caltrans, with the alternatives that actually work.",

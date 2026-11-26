@@ -5,8 +5,7 @@ import { CORRIDORS, statusCorridor } from "@/lib/corridors";
 import { getCorridorStatus, cleanEvent } from "@/lib/ndot";
 import { webPageSchema } from "@/lib/schema";
 
-export const revalidate = 120;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Live Feed | All I-15 Corridor Conditions in One Stream",
   description: "Every condition posting, event, and corridor verdict for Las Vegas, Primm, the Mountain Pass approach, Mesquite, and Cajon Pass in one live stream, from Nevada 511 and Caltrans.",

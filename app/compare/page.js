@@ -2,6 +2,7 @@ import Link from "next/link";
 import JsonLd from "@/components/JsonLd";
 import { COMPARES } from "@/lib/compare";
 import { webPageSchema } from "@/lib/schema";
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Compare the Drives | I-15 North vs South From Las Vegas",

@@ -7,7 +7,7 @@ import { getCorridorStatus } from "@/lib/ndot";
 import { getAllCaltransCameras } from "@/lib/caltrans";
 import { webPageSchema, breadcrumbSchema, cameraListSchema } from "@/lib/schema";
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 export const dynamicParams = false;
 
 export function generateStaticParams() {

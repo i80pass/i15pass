@@ -6,7 +6,7 @@ import { getCorridorStatus } from "@/lib/ndot";
 import { getAllCaltransCameras } from "@/lib/caltrans";
 import { webPageSchema, cameraListSchema } from "@/lib/schema";
 
-export const revalidate = 120;
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Cajon Pass Cameras | I-15 Traffic Cameras Live",

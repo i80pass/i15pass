@@ -11,8 +11,7 @@ import { ROUTES } from "@/lib/routes-data";
 import { getCorridorStatus } from "@/lib/ndot";
 import { webPageSchema, webSiteSchema, faqSchema, roadConditionSchema } from "@/lib/schema";
 
-export const revalidate = 120;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: `I-15 Conditions and Cameras: Las Vegas, Primm, Mountain Pass, Mesquite | ${SITE.name}.com`,
   description: "Live I-15 road conditions, cameras, and posted restrictions for Las Vegas, Primm and the California line, Mountain Pass, Mesquite, and the Virgin River Gorge, from Nevada 511.",

@@ -4,8 +4,7 @@ import { SITE } from "@/lib/site-config";
 import { getStripCameras } from "@/lib/ndot";
 import { webPageSchema, cameraListSchema } from "@/lib/schema";
 
-export const revalidate = 300;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Las Vegas Strip Camera Tour | Walk the Boulevard by Live Camera",
   description: "A walking tour of the Las Vegas Strip told through its live traffic cameras: from the Welcome to Fabulous Las Vegas sign to downtown, one Nevada 511 frame at a time, south to north.",

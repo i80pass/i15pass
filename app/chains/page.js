@@ -6,8 +6,7 @@ import { CORRIDORS, statusCorridor } from "@/lib/corridors";
 import { getCorridorStatus } from "@/lib/ndot";
 import { webPageSchema } from "@/lib/schema";
 
-export const revalidate = 120;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Chains Required on I-15? I-15 Chain Control Today | i15pass.com",
   description: "Live chain control status for I-15 today, zone by zone: Caltrans chain levels at Cajon Pass, Nevada 511 postings for Las Vegas, Primm, and Mesquite, and the live condition status for the Virgin River Gorge and the Utah stretch to St. George.",

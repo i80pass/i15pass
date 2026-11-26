@@ -20,6 +20,7 @@ export async function GET(request) {
         restriction: status.traction,
         sentence: statusSentence(c, status),
         updatedAt: status.updatedAt,
+        verifiedAt: status.verifiedAt,
         source: "Nevada 511 / NDOT",
       };
     })

@@ -16,6 +16,9 @@ export default function StatusBanner({ corridor, status, heading, href = null })
   const updated = status.updatedAt
     ? new Date(status.updatedAt * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
     : null;
+  const verified = status.verifiedAt
+    ? new Date(status.verifiedAt * 1000).toLocaleString("en-US", { timeZone: "America/Los_Angeles", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })
+    : null;
   const bannerBg = !status.live
     ? "bg-slate-600"
     : status.closed
@@ -56,7 +59,7 @@ export default function StatusBanner({ corridor, status, heading, href = null })
         box
       )}
       <p className="text-[11px] text-secondary mt-2 font-mono uppercase tracking-wide">
-        {corridor.dataCreditShort || SITE.dataCreditShort}{updated ? ` | ${corridor.statusSource === "caltrans" ? "Caltrans" : "Nevada 511"} report ${updated} PT` : ""}
+        {corridor.dataCreditShort || SITE.dataCreditShort}{updated ? ` | ${corridor.statusSource === "caltrans" ? "Caltrans" : "Nevada 511"} report ${updated} PT` : ""}{verified ? ` | Verified ${verified} PT` : ""}
       </p>
       {corridor.coverageNote && (
         <p className="text-sm text-secondary leading-relaxed mt-2">{corridor.coverageNote}</p>

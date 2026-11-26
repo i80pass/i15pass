@@ -7,8 +7,7 @@ import { getCorridorStatus } from "@/lib/ndot";
 import { LAW_INTRO, LAW_SECTIONS, LAW_FAQS, LAW_SOURCES } from "@/lib/law";
 import { webPageSchema, faqSchema } from "@/lib/schema";
 
-export const revalidate = 120;
-
+export const dynamic = "force-dynamic";
 export const metadata = {
   title: "Nevada Chain and Wind Rules | What NDOT Postings Require on I-15",
   description: "Nevada chain, snow tire, and wind restriction rules in plain English: how NDOT posts requirements on I-15, what each posted phrase obliges you to do, and the live postings for every stretch.",

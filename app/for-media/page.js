@@ -5,7 +5,7 @@ import { CORRIDORS, statusCorridor } from "@/lib/corridors";
 import { getCorridorStatus, statusSentence } from "@/lib/ndot";
 import { webPageSchema } from "@/lib/schema";
 
-export const revalidate = 120;
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "For Media | I-15 Conditions, Quotable Verdicts and Camera Use",

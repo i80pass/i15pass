@@ -1,283 +1,332 @@
-import { notFound } from "next/navigation";
 import Link from "next/link";
-import JsonLd from "@/components/JsonLd";
+import { notFound } from "next/navigation";
 import StatusBanner from "@/components/StatusBanner";
 import CameraGrid from "@/components/CameraGrid";
 import FaqBlock from "@/components/FaqBlock";
 import AdSlot from "@/components/AdSlot";
 import EditorialSections from "@/components/EditorialSections";
-import StormAlerts from "@/components/StormAlerts";
-import { CORRIDORS, getCorridor } from "@/lib/corridors";
-import { TOWNS } from "@/lib/towns";
-import { ROUTES } from "@/lib/routes-data";
-import { COMPARES } from "@/lib/compare";
-import {
-  getCorridorStatus,
-  getCorridorCameras,
-  statusSentence,
-} from "@/lib/caltrans";
-import { getTownWeather, getWeatherAlerts } from "@/lib/weather";
-import {
-  webPageSchema,
-  roadConditionSchema,
-  faqSchema,
-  cameraListSchema,
-  placeSchema,
-  breadcrumbSchema,
-} from "@/lib/schema";
+import JsonLd from "@/components/JsonLd";
+import StatelineBoard from "@/components/StatelineBoard";
+import { SITE } from "@/lib/site-config";
+import { CORRIDORS, statusCorridor } from "@/lib/corridors";
+import { TOWNS, getTown } from "@/lib/towns";
+import { ROUTES, getRoute } from "@/lib/routes-data";
+import { COMPARES, getCompare } from "@/lib/compare";
+import { getCorridorStatus, getCorridorCameras, getWeatherStations, corridorStations, parseF, cleanEvent } from "@/lib/ndot";
+import { getTownWeather, getWeatherAlerts, getPointWeather, getPointAlerts } from "@/lib/weather";
+import { webPageSchema, faqSchema, roadConditionSchema, cameraListSchema, placeSchema, breadcrumbSchema } from "@/lib/schema";
+import { STATELINE_FAQS } from "@/lib/stateline-faqs";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = false;
 
-export function generateStaticParams() {
-  const slugs = [];
-  for (const c of CORRIDORS) {
-    slugs.push({ slug: c.slug });
-    slugs.push({ slug: `${c.slug}-cameras` });
+function resolve(slug) {
+  const corridor = CORRIDORS.find((c) => c.slug === slug);
+  if (corridor) return { kind: "corridor", corridor };
+  if (slug.endsWith("-weather")) {
+    const t = getTown(slug.slice(0, -"-weather".length));
+    if (t) return { kind: "town", town: t };
   }
-  for (const t of TOWNS) slugs.push({ slug: `${t.slug}-weather` });
-  for (const r of ROUTES) slugs.push({ slug: r.slug });
-  for (const c of COMPARES) slugs.push({ slug: c.slug });
-  return slugs;
+  const route = getRoute(slug);
+  if (route) return { kind: "route", route };
+  const compare = getCompare(slug);
+  if (compare) return { kind: "compare", compare };
+  return null;
 }
 
-function resolve(slug) {
-  const corridor = getCorridor(slug);
-  if (corridor) return { type: "corridor", corridor };
-  if (slug.endsWith("-cameras")) {
-    const c = getCorridor(slug.slice(0, -"-cameras".length));
-    if (c) return { type: "strip", corridor: c };
-  }
-  if (slug.endsWith("-weather")) {
-    const town = TOWNS.find((t) => t.slug === slug.slice(0, -"-weather".length));
-    if (town) return { type: "town", town };
-  }
-  const route = ROUTES.find((r) => r.slug === slug);
-  if (route) return { type: "route", route };
-  const compare = COMPARES.find((c) => c.slug === slug);
-  if (compare) return { type: "compare", compare };
-  return null;
+export function generateStaticParams() {
+  return [
+    ...CORRIDORS.map((c) => ({ slug: c.slug })),
+    ...TOWNS.map((t) => ({ slug: `${t.slug}-weather` })),
+    ...ROUTES.map((r) => ({ slug: r.slug })),
+    ...COMPARES.map((c) => ({ slug: c.slug })),
+  ];
 }
 
 export async function generateMetadata({ params }) {
   const { slug } = await params;
   const r = resolve(slug);
   if (!r) return {};
-  if (r.type === "corridor") {
+  if (r.kind === "corridor") {
     const c = r.corridor;
     return {
-      title: `${c.name} Conditions: Is ${c.routeLabel} Open? Cameras, Chains & Closures`,
-      description: `Live ${c.name} (${c.routeLabel}, ${c.fromTo}) conditions from Caltrans: open or closed, chain controls, lane closures, traffic cameras and ${c.summit.name} weather at ${c.summit.elevation.toLocaleString()} feet.`,
+      title: `${c.name} Road Conditions and Cameras | ${c.routeLabel} Live`,
+      description: `Live ${c.name} (${c.routeLabel}) road conditions, ${c.agency || "Nevada 511"} cameras in driving order, posted restrictions, and weather from ${c.fromTo}.`,
       alternates: { canonical: `/${c.slug}` },
     };
   }
-  if (r.type === "strip") {
-    const c = r.corridor;
+  if (r.kind === "town") {
     return {
-      title: `${c.name} Cameras: ${c.routeLabel} Camera Strip in Driving Order`,
-      description: `Every Caltrans traffic camera on ${c.routeLabel} through ${c.name}, in driving order, each with its own page: ${c.fromTo}.`,
-      alternates: { canonical: `/${c.slug}-cameras` },
+      title: `${r.town.name} Weather and Road Conditions`,
+      description: `${r.town.name} weather forecast from the National Weather Service, plus the live I-15 conditions that decide the drive from here.`,
+      alternates: { canonical: `/${r.town.slug}-weather` },
     };
   }
-  if (r.type === "town") {
-    const t = r.town;
+  if (r.kind === "route") {
     return {
-      title: `${t.name} Weather & Road Conditions`,
-      description: `Live weather for ${t.name}, California (${t.elevation.toLocaleString()} ft) with the current pass verdict for the corridor it serves, from the National Weather Service and Caltrans.`,
-      alternates: { canonical: `/${t.slug}-weather` },
-    };
-  }
-  if (r.type === "route") {
-    return {
-      title: `${r.route.name}: Live Pass Conditions & Drive Guide`,
-      description: `${r.route.name} (${r.route.miles} miles, ${r.route.driveTime.toLowerCase()}): live pass verdicts, cameras in driving order, and a segment by segment guide.`,
+      title: `${r.route.name} Road Conditions and Drive Guide`,
+      description: `Live conditions for the ${r.route.name} drive: stretch by stretch verdicts, cameras in driving order, and a segment by segment guide. ${r.route.miles} miles, ${r.route.driveTime.toLowerCase()}.`,
       alternates: { canonical: `/${r.route.slug}` },
     };
   }
-  if (r.type === "compare") {
-    return {
-      title: `${r.compare.title}: Live Conditions, Side by Side`,
-      description:
-        "Grapevine vs Tehachapi Pass with both live Caltrans verdicts side by side: elevation, closures, chain controls, wind, cameras, and which pass to take today.",
-      alternates: { canonical: `/${r.compare.slug}` },
-    };
-  }
-  return {};
+  return {
+    title: `${r.compare.title} | Live Comparison`,
+    description: r.compare.intro,
+    alternates: { canonical: `/${r.compare.slug}` },
+  };
 }
 
-export default async function SlugPage({ params }) {
-  const { slug } = await params;
-  const r = resolve(slug);
-  if (!r) notFound();
-  if (r.type === "corridor") return <CorridorPage corridor={r.corridor} />;
-  if (r.type === "strip") return <StripPage corridor={r.corridor} />;
-  if (r.type === "town") return <TownPage town={r.town} />;
-  if (r.type === "route") return <RoutePage route={r.route} />;
-  if (r.type === "compare") return <ComparePage compare={r.compare} />;
-  notFound();
-}
-
-/* ---------------------------------- corridor --------------------------------- */
-
-async function CorridorPage({ corridor }) {
-  const [status, cameras] = await Promise.all([
-    getCorridorStatus(corridor),
-    getCorridorCameras(corridor),
-  ]);
-  const sentence = statusSentence(corridor, status);
-  const events = [
-    ...(status.fullClosures || []).map((c) => ({ ...c, kind: "Full closure" })),
-    ...(status.laneClosures || []).map((c) => ({ ...c, kind: "Lane closure" })),
-  ];
+function EventList({ events, agency, credit }) {
+  if (!events?.length) return null;
+  const cleaned = events.map(cleanEvent);
   return (
-    <main className="max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop py-8 space-y-8">
-      <JsonLd
-        data={[
-          webPageSchema({
-            name: `${corridor.name} conditions`,
-            description: sentence,
-            path: `/${corridor.slug}`,
-          }),
-          roadConditionSchema(corridor, status, sentence),
-          faqSchema(corridor.faqs),
-          cameraListSchema(corridor, cameras),
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: corridor.name, path: `/${corridor.slug}` },
-          ]),
-        ]}
-      />
-      <section>
-        <div className="text-label-md font-bold tracking-widest text-primary uppercase mb-2">
-          {corridor.routeName}, {corridor.fromTo}
-        </div>
-        <h1 className="text-xl font-black uppercase tracking-wide leading-snug">
-          {corridor.name}: is {corridor.routeLabel} open?
-        </h1>
-      </section>
-
-      <StatusBanner corridor={corridor} status={status} sentence={sentence} compact />
-
-      <section>
-        <div className="flex items-end justify-between mb-4">
-          <h2 className="text-headline-sm font-bold text-primary">Live cameras</h2>
-          <Link href={`/${corridor.slug}-cameras`} className="font-semibold text-primary hover:underline text-sm">
-            Open the full strip
-          </Link>
-        </div>
-        <CameraGrid cameras={cameras} limit={cameras.length > 5 ? 3 : undefined} />
-        {cameras.length > 5 && (
-          <Link
-            href={`/${corridor.slug}-cameras`}
-            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-          >
-            <span className="material-symbols-outlined text-[18px]">videocam</span>
-            SEE ALL WEBCAMS
-          </Link>
-        )}
-        <p className="text-xs text-on-surface-variant mt-3">
-          Official Caltrans CCTV stills, refreshed by the state. Cameras shown in driving order.
-        </p>
-      </section>
-
-      {/* Ad slot 1 of 2: below the webcams.
-          Renders nothing until AdSense is activated (AdSlot gate). */}
-      <AdSlot slot="belowCameras" />
-
-      {corridor.intro.map((p, i) => (
-        <p key={i} className="text-lg text-on-surface-variant leading-relaxed max-w-3xl">{p}</p>
-      ))}
-
-      <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-        <h2 className="text-title-lg font-bold text-primary mb-2">Pass conditions</h2>
-        <p className="text-on-surface-variant mb-4">
-          {corridor.miles} miles, {corridor.driveTime.toLowerCase()}, summit {corridor.summit.name},{" "}
-          {corridor.summit.elevation.toLocaleString()} ft
-        </p>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-center">
-          <div className="bg-surface-container rounded-lg p-3">
-            <div className="text-label-md text-on-surface-variant uppercase tracking-wide">Summit</div>
-            <div className="font-bold text-on-surface">
-              {corridor.summit.name}, {corridor.summit.elevation.toLocaleString()} ft
-            </div>
+    <section className="mt-8">
+      <h2 className="text-xl font-bold text-on-surface mb-3">{agency ? `${agency} is reporting` : "NDOT is reporting"}</h2>
+      <div className="glass-card rounded-2xl divide-y divide-outline-variant/20 overflow-hidden">
+        {cleaned.slice(0, 10).map((e, i) => (
+          <div key={i} className="px-4 py-3">
+            <p className="text-sm font-bold text-on-surface">
+              {e.type}{e.fullClosure ? " : FULL CLOSURE" : ""}
+            </p>
+            <p className="text-sm text-secondary leading-relaxed">{e.comment}</p>
           </div>
-          <div className="bg-surface-container rounded-lg p-3">
-            <div className="text-label-md text-on-surface-variant uppercase tracking-wide">Summit temp</div>
-            <div className="font-bold text-on-surface">
-              {status.summitTempF != null ? `${status.summitTempF}°F` : "See forecast"}
-            </div>
-          </div>
-          <div className="bg-surface-container rounded-lg p-3">
-            <div className="text-label-md text-on-surface-variant uppercase tracking-wide">Chain control</div>
-            <div className="font-bold text-on-surface">
-              {status.chain && status.chain.level > 0 ? `R${status.chain.level} in effect` : "None posted"}
-            </div>
-          </div>
-          <div className="bg-surface-container rounded-lg p-3">
-            <div className="text-label-md text-on-surface-variant uppercase tracking-wide">Active lane closures</div>
-            <div className="font-bold text-on-surface">{status.laneClosures?.length || 0}</div>
-          </div>
-        </div>
-      </section>
+        ))}
+      </div>
+      <p className="text-xs text-secondary mt-2">{credit || SITE.dataCreditShort}</p>
+    </section>
+  );
+}
 
-      {events.length > 0 && (
-        <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-          <h2 className="text-title-lg font-bold text-primary mb-4">Active closures on {corridor.routeLabel}</h2>
-          <ul className="space-y-3">
-            {events.map((e, i) => (
-              <li key={i} className="border-b border-outline-variant/30 pb-3 last:border-0">
-                <span className={`text-label-md font-bold px-2 py-0.5 rounded-full mr-2 ${e.kind === "Full closure" ? "bg-red-700 text-white" : "bg-amber-500 text-black"}`}>
-                  {e.kind.toUpperCase()}
-                </span>
-                <span className="font-semibold text-on-surface">
-                  {e.direction ? `${e.direction} ` : ""}{e.route} near {e.place || e.name}
-                </span>
-                <div className="text-sm text-on-surface-variant mt-1">
-                  {e.work || "Closure"}
-                  {e.lanesClosed ? `, ${e.lanesClosed} of ${e.totalLanes || "?"} lanes closed` : ""}
-                  {e.delay && e.delay !== "No Delay" && e.delay !== "0" ? `, delay: ${e.delay}` : ""}
-                  {!e.endEpoch ? ", no posted end time" : ""}
-                </div>
-              </li>
+function SegmentsList({ segments, agency, credit }) {
+  if (!segments?.length) return null;
+  return (
+    <section className="mt-8">
+      <h2 className="text-xl font-bold text-on-surface mb-3">{agency ? `What ${agency} posts on this stretch` : "What NDOT posts on this stretch"}</h2>
+      <div className="glass-card rounded-2xl divide-y divide-outline-variant/20 overflow-hidden">
+        {segments.slice(0, 8).map((s, i) => (
+          <div key={i} className="px-4 py-3">
+            <p className="text-sm font-bold text-on-surface">{s.LocationDescription || s.RoadwayName}</p>
+            <p className="text-sm text-secondary leading-relaxed">
+              {s.statusText || "No special posting"}{s.secondary?.length ? ` | ${s.secondary.join("; ")}` : ""}
+            </p>
+          </div>
+        ))}
+      </div>
+      <p className="text-xs text-secondary mt-2">{agency ? `Posted in Caltrans' own words, from the Caltrans District 8 feed. ${credit}.` : `Posted in NDOT's own words by Nevada 511. Conditions courtesy NDOT and Nevada 511.`}</p>
+    </section>
+  );
+}
+
+function StationTable({ stations }) {
+  if (!stations?.length) return null;
+  return (
+    <section className="mt-8">
+      <h2 className="text-xl font-bold text-on-surface mb-3">Roadside weather on this stretch</h2>
+      <div className="glass-card rounded-2xl overflow-hidden">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-secondary border-b border-outline-variant/30">
+              <th className="px-4 py-2 font-semibold">Station</th>
+              <th className="px-4 py-2 font-semibold">Air</th>
+              <th className="px-4 py-2 font-semibold">Dewpoint</th>
+              <th className="px-4 py-2 font-semibold">Wind</th>
+            </tr>
+          </thead>
+          <tbody>
+            {stations.slice(0, 4).map((s, i) => (
+              <tr key={i} className="border-b border-outline-variant/10 last:border-0">
+                <td className="px-4 py-2 font-semibold text-on-surface">{s.DeviceName || s.StationName}</td>
+                <td className="px-4 py-2">{parseF(s.AirTemperature) !== null ? `${Math.round(parseF(s.AirTemperature))}°F` : "n/a"}</td>
+                <td className="px-4 py-2">{parseF(s.Dewpoint) !== null ? `${Math.round(parseF(s.Dewpoint))}°F` : "n/a"}</td>
+                <td className="px-4 py-2">{parseF(s.Wind) !== null ? `${Math.round(parseF(s.Wind))} mph ${s.WindDirection || ""}` : "n/a"}{parseF(s.WindGust) !== null ? `, gusting ${Math.round(parseF(s.WindGust))}` : ""}</td>
+              </tr>
             ))}
-          </ul>
-        </section>
-      )}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-secondary mt-2">Temperatures are Fahrenheit and wind is miles per hour, as NDOT reports them. {SITE.dataCreditShort}.</p>
+    </section>
+  );
+}
 
-      <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-        <h2 className="text-title-lg font-bold text-primary mb-4">The drive, checkpoint by checkpoint</h2>
-        <div className="grid md:grid-cols-2 gap-4">
-          {corridor.checkpoints.map((cp, i) => (
-            <div key={i} className="bg-surface-container rounded-lg p-4">
-              <div className="font-bold text-on-surface">{cp.name}</div>
-              <p className="text-sm text-on-surface-variant leading-relaxed mt-1">{cp.note}</p>
+async function SummitWeather({ corridor }) {
+  if (!corridor.weatherPoint) return null;
+  const [weather, alerts] = await Promise.all([
+    getPointWeather(corridor.weatherPoint.lat, corridor.weatherPoint.lon),
+    getPointAlerts(corridor.weatherPoint.lat, corridor.weatherPoint.lon),
+  ]);
+  const today = weather?.periods?.[0];
+  return (
+    <section className="mt-8">
+      <h2 className="text-xl font-bold text-on-surface mb-3">Weather at {corridor.weatherPoint.label}</h2>
+      {alerts.length > 0 && (
+        <div className="space-y-2 mb-3">
+          {alerts.map((a, i) => (
+            <div key={i} className="rounded-2xl bg-error text-on-error px-4 py-3">
+              <p className="font-bold text-sm">{a.event}</p>
+              <p className="text-sm">{a.headline}</p>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="glass-card rounded-2xl p-4 md:p-5">
+        {today ? (
+          <>
+            <p className="text-body-md text-on-surface font-semibold">
+              {corridor.weatherPoint.label} right now: {today.shortForecast}, {today.temperature}°{today.temperatureUnit}.
+            </p>
+            <p className="text-sm text-secondary leading-relaxed mt-2">{today.detailedForecast}</p>
+          </>
+        ) : (
+          <p className="text-body-md text-secondary leading-relaxed">
+            The National Weather Service forecast for {corridor.weatherPoint.label} is not loading right now. The live
+            verdict above is the part of this page to trust until it returns.
+          </p>
+        )}
+        <p className="text-xs text-secondary mt-3">Forecast: National Weather Service, for the point itself, not the valley floor.</p>
+      </div>
+    </section>
+  );
+}
+
+// The Primm and State Line page is the Stateline backup module: the
+// approved reader board design, with the corridor's live NDOT layer and
+// editorial sections below it. The module carries its own FAQ (schema
+// from lib/stateline-faqs.js, the same questions it renders), so the
+// corridor FaqBlock is not repeated here.
+async function PrimmPage({ corridor }) {
+  const eff = statusCorridor(corridor);
+  const [status, stations] = await Promise.all([
+    getCorridorStatus(eff),
+    getWeatherStations(),
+  ]);
+  const myStations = corridorStations(stations, eff);
+  return (
+    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
+      <JsonLd data={[
+        webPageSchema({ path: `/${corridor.slug}`, title: `${corridor.name} Road Conditions`, description: corridor.intro[0] }),
+        roadConditionSchema(corridor, status),
+        faqSchema(STATELINE_FAQS),
+        breadcrumbSchema([{ name: "Home", path: "/" }, { name: corridor.name, path: `/${corridor.slug}` }]),
+      ]} />
+      <StatelineBoard />
+      <section className="mt-10">
+        <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">What Nevada 511 is posting on this stretch</h2>
+        <StatusBanner corridor={corridor} status={status} heading={`${corridor.name} right now`} />
+      </section>
+      <section className="mt-10">
+        <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Corridor checkpoints</h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          {corridor.checkpoints.map((cp) => (
+            <div key={cp.name} className="glass-card rounded-2xl p-4">
+              <p className="font-bold text-on-surface text-sm">{cp.name}</p>
+              <p className="text-sm text-secondary leading-relaxed mt-1">{cp.note}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <StormAlerts />
+      <SegmentsList segments={status.segments} />
+      <StationTable stations={myStations} />
+      <EventList events={status.events} />
 
       <EditorialSections sections={corridor.sections} />
 
-      <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-        <h2 className="text-title-lg font-bold text-primary mb-3">Towns on this corridor</h2>
-        <div className="flex flex-wrap gap-2">
-          {corridor.towns.map((ts) => {
-            const t = TOWNS.find((x) => x.slug === ts);
-            if (!t) return null;
-            return (
-              <Link key={ts} href={`/${ts}-weather`} className="bg-surface-container hover:bg-surface-container-high rounded-full px-4 py-2 text-sm font-semibold">
-                {t.name} weather
-              </Link>
-            );
+      <section className="mt-10 glass-card rounded-2xl p-4 md:p-5">
+        <h2 className="text-headline-sm text-on-surface mb-2">Towns on this stretch</h2>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {corridor.towns.map((slug) => {
+            const t = getTown(slug);
+            return t ? (
+              <Link key={slug} href={`/${slug}-weather`} className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">{t.name} weather</Link>
+            ) : null;
           })}
-          <Link href={`/${corridor.slug}-cameras`} className="bg-surface-container hover:bg-surface-container-high rounded-full px-4 py-2 text-sm font-semibold">
-            {corridor.name} cameras
-          </Link>
-          <Link href="/chains" className="bg-surface-container hover:bg-surface-container-high rounded-full px-4 py-2 text-sm font-semibold">
-            Chain control levels
-          </Link>
+          <Link href="/las-vegas-to-los-angeles" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Las Vegas to Los Angeles</Link>
+          <Link href="/status-history" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Status history</Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+async function CorridorPage({ corridor }) {
+  if (corridor.slug === "primm-state-line") return <PrimmPage corridor={corridor} />;
+  const eff = statusCorridor(corridor);
+  const [status, cameras, stations] = await Promise.all([
+    getCorridorStatus(eff),
+    getCorridorCameras(corridor),
+    getWeatherStations(),
+  ]);
+  const myStations = corridorStations(stations, eff);
+  return (
+    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
+      <JsonLd data={[
+        webPageSchema({ path: `/${corridor.slug}`, title: `${corridor.name} Road Conditions`, description: corridor.intro[0] }),
+        roadConditionSchema(corridor, status),
+        faqSchema(corridor.faqs),
+        cameraListSchema(cameras, corridor.name),
+        breadcrumbSchema([{ name: "Home", path: "/" }, { name: corridor.name, path: `/${corridor.slug}` }]),
+      ]} />
+      <p className="text-label-md text-primary font-bold uppercase tracking-wide">{corridor.routeLabel} | {corridor.fromTo}</p>
+      <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface mt-1">{corridor.name} road conditions</h1>
+      <div className="mt-5">
+        <StatusBanner corridor={corridor} status={status} heading={`${corridor.name} right now`} />
+      </div>
+      {cameras.length > 0 && (
+        <section className="mt-8">
+          <div className="flex items-baseline justify-between mb-3">
+            <h2 className="text-xl font-bold text-on-surface">Cameras in driving order</h2>
+            {corridor.statusSource === "caltrans" && (
+              <Link href="/cameras" className="text-sm font-bold text-primary">See all Cajon Pass cameras</Link>
+            )}
+          </div>
+          <CameraGrid cameras={cameras.slice(0, cameras.length > 5 ? 3 : 6)} />
+        </section>
+      )}
+
+      {/* Ad slot 1 of 2: below the webcams.
+          Renders nothing until AdSense is activated (AdSlot gate). */}
+      <AdSlot slot="belowCameras" />
+
+      <section className="mt-10">
+        <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-4">Corridor checkpoints</h2>
+        <div className="grid md:grid-cols-2 gap-3">
+          {corridor.checkpoints.map((cp) => (
+            <div key={cp.name} className="glass-card rounded-2xl p-4">
+              <p className="font-bold text-on-surface text-sm">{cp.name}</p>
+              <p className="text-sm text-secondary leading-relaxed mt-1">{cp.note}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <SegmentsList segments={status.segments} agency={corridor.agency} credit={corridor.dataCreditShort} />
+      <StationTable stations={myStations} />
+      <SummitWeather corridor={corridor} />
+      <EventList events={status.events} agency={corridor.agency} credit={corridor.dataCreditShort} />
+
+      {corridor.intro.map((p, i) => (
+        <p key={i} className="text-sm md:text-base text-secondary leading-relaxed mt-5 max-w-3xl">{p}</p>
+      ))}
+
+      <EditorialSections sections={corridor.sections} />
+
+      <section className="mt-10 glass-card rounded-2xl p-4 md:p-5">
+        <h2 className="text-headline-sm text-on-surface mb-2">Towns on this stretch</h2>
+        <div className="flex flex-wrap gap-2 mt-2">
+          {corridor.towns.map((slug) => {
+            const t = getTown(slug);
+            return t ? (
+              <Link key={slug} href={`/${slug}-weather`} className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">{t.name} weather</Link>
+            ) : null;
+          })}
+          {corridor.slug === "las-vegas" && (
+            <Link href="/las-vegas-strip-camera-tour" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Strip camera tour</Link>
+          )}
+          {corridor.slug === "cajon-pass" && (
+            <Link href="/cameras" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Cajon Pass cameras</Link>
+          )}
+          <Link href="/status-history" className="btn-nav-dark px-4 py-2 rounded-full text-sm font-semibold">Status history</Link>
         </div>
       </section>
 
@@ -290,324 +339,196 @@ async function CorridorPage({ corridor }) {
   );
 }
 
-/* ------------------------------------ strip ---------------------------------- */
-
-async function StripPage({ corridor }) {
-  const cameras = await getCorridorCameras(corridor);
-  const status = await getCorridorStatus(corridor);
-  const sentence = statusSentence(corridor, status);
-  return (
-    <main className="max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop py-8 space-y-8">
-      <JsonLd
-        data={[
-          webPageSchema({
-            name: `${corridor.name} cameras`,
-            description: `Every Caltrans camera on ${corridor.routeLabel} through ${corridor.name}, in driving order.`,
-            path: `/${corridor.slug}-cameras`,
-          }),
-          cameraListSchema(corridor, cameras),
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: corridor.name, path: `/${corridor.slug}` },
-            { name: "Cameras", path: `/${corridor.slug}-cameras` },
-          ]),
-        ]}
-      />
-      <section>
-        <div className="text-label-md font-bold tracking-widest text-primary uppercase mb-2">
-          {corridor.routeName}, camera strip
-        </div>
-        <h1 className="text-xl font-black uppercase tracking-wide leading-snug">
-          {corridor.name} cameras, in driving order
-        </h1>
-     </section>
-      <CameraGrid cameras={cameras} />
-      <p className="answer-first text-lg text-on-surface-variant leading-relaxed mt-3 max-w-3xl">
-          {sentence} Below are all {cameras.length} Caltrans cameras on this corridor in the order you
-          pass them driving {corridor.directions[0].toLowerCase()}bound, each with its own page. Read
-          them like a story: the bottom of the grade, the climb, the top country, the descent.
-        </p>
-      <p className="text-sm text-on-surface-variant max-w-3xl leading-relaxed">
-        Still images are the official Caltrans CCTV frames for each location, served by the state and
-        refreshed continuously. A frame can lag reality in fast weather; the corridor verdict at the top
-        of the {corridor.name} page is the authority, and the cameras are the pictures behind it.
-      </p>
-      <StormAlerts />
-      <div className="flex flex-wrap gap-3">
-        <Link href={`/${corridor.slug}`} className="bg-primary text-white font-bold rounded-full px-5 py-2.5">
-          {corridor.name} conditions and verdict
-        </Link>
-        <Link href="/cameras" className="bg-surface-container font-bold rounded-full px-5 py-2.5 text-primary">
-          Cameras on both passes
-        </Link>
-      </div>
-    </main>
-  );
-}
-
-/* ------------------------------------ town ----------------------------------- */
-
-function fmtTime(iso) {
-  try {
-    return new Date(iso).toLocaleTimeString("en-US", {
-      timeZone: "America/Los_Angeles",
-      hour: "numeric",
-      minute: "2-digit",
-    });
-  } catch {
-    return "";
-  }
-}
-
 async function TownPage({ town }) {
-  const [weather, alerts] = await Promise.all([
-    getTownWeather(town),
-    getWeatherAlerts(town.lat, town.lon),
-  ]);
-  const banners = [];
-  for (const slug of town.corridors) {
-    const corridor = getCorridor(slug);
-    const status = await getCorridorStatus(corridor);
-    banners.push({ corridor, status, sentence: statusSentence(corridor, status) });
-  }
-  const now = weather?.hourly?.[0];
+  const [weather, alerts] = await Promise.all([getTownWeather(town), getWeatherAlerts(town)]);
+  const corridors = CORRIDORS.filter((c) => town.corridors.includes(c.slug));
+  const statuses = await Promise.all(corridors.map((c) => getCorridorStatus(statusCorridor(c))));
+  const tz = town.state === "UT" ? "America/Denver" : "America/Los_Angeles";
+  const today = weather?.periods?.[0];
   return (
-    <main className="max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop py-8 space-y-8">
-      <JsonLd
-        data={[
-          webPageSchema({
-            name: `${town.name} weather`,
-            description: `Live weather and pass conditions for ${town.name}, California.`,
-            path: `/${town.slug}-weather`,
-          }),
-          placeSchema(town),
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: `${town.name} weather`, path: `/${town.slug}-weather` },
-          ]),
-        ]}
-      />
-      <section>
-        <div className="text-label-md font-bold tracking-widest text-primary uppercase mb-2">
-          {town.name}, California, {town.elevation.toLocaleString()} ft
-        </div>
-        <h1 className="text-xl font-black uppercase tracking-wide leading-snug">{town.name} weather</h1>
-        <p className="answer-first text-lg md:text-xl text-on-surface-variant leading-relaxed mt-3 max-w-3xl">
-          {now
-            ? `Right now in ${town.name} it is ${now.temperature}°F and ${String(now.shortForecast || "").toLowerCase()}, with wind ${now.windDirection || ""} at ${now.windSpeed || "calm"}. The live pass verdict for the corridor ${town.name} serves is below.`
-            : `The live pass verdict for the corridor ${town.name} serves is below; the forecast feed is refreshing.`}
-        </p>
-      </section>
-
-      {banners.map(({ corridor, status, sentence }) => (
-        <StatusBanner key={corridor.slug} corridor={corridor} status={status} sentence={sentence} compact />
-      ))}
+    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
+      <JsonLd data={[
+        webPageSchema({ path: `/${town.slug}-weather`, title: `${town.name} Weather`, description: town.body[0] }),
+        placeSchema(town),
+      ]} />
+      <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{town.name} weather</h1>
+      <p className="text-sm text-secondary mt-2">Elevation about {town.elevation.toLocaleString()} feet | Forecast: National Weather Service</p>
 
       {alerts.length > 0 && (
-        <section className="bg-red-50 border border-red-200 rounded-xl p-6">
-          <h2 className="text-title-lg font-bold text-red-800 mb-3">Active weather alerts for {town.name}</h2>
-          <ul className="space-y-3">
-            {alerts.map((a, i) => (
-              <li key={i}>
-                <div className="font-bold text-red-900">{a.event}</div>
-                <div className="text-sm text-red-800">{a.headline}</div>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {weather && (
-        <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-          <h2 className="text-title-lg font-bold text-primary mb-4">Next 24 hours</h2>
-          <div className="flex gap-3 overflow-x-auto pb-2">
-            {weather.hourly.slice(0, 24).map((h, i) => (
-              <div key={i} className="min-w-[86px] bg-surface-container rounded-lg p-3 text-center">
-                <div className="text-xs font-semibold text-on-surface-variant">{fmtTime(h.startTime)}</div>
-                <div className="text-xl font-black text-on-surface my-1">{h.temperature}°</div>
-                <div className="text-[11px] text-on-surface-variant leading-tight">{h.shortForecast}</div>
-                <div className="text-[11px] font-semibold text-primary mt-1">{h.probabilityOfPrecipitation?.value || 0}% precip</div>
-              </div>
-            ))}
-          </div>
-          <h2 className="text-title-lg font-bold text-primary mt-6 mb-4">Day by day</h2>
-          <div className="grid md:grid-cols-2 gap-3">
-            {weather.periods.map((p, i) => (
-              <div key={i} className="bg-surface-container rounded-lg p-4">
-                <div className="font-bold text-on-surface">{p.name}</div>
-                <div className="text-2xl font-black text-primary my-1">{p.temperature}°{p.temperatureUnit}</div>
-                <p className="text-sm text-on-surface-variant leading-relaxed">{p.detailedForecast}</p>
-              </div>
-            ))}
-          </div>
-          <p className="text-xs text-on-surface-variant mt-4">
-            Forecast: National Weather Service{weather.office ? ` (${weather.office} office)` : ""}. Times Pacific.
-          </p>
-        </section>
-      )}
-
-      <StormAlerts />
-
-      {town.body.map((p, i) => (
-        <p key={i} className="text-lg text-on-surface-variant leading-relaxed max-w-3xl">{p}</p>
-      ))}
-
-      <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-        <h2 className="text-title-lg font-bold text-primary mb-2">Driving note</h2>
-        <p className="text-on-surface-variant leading-relaxed">{town.driveNote}</p>
-      </section>
-    </main>
-  );
-}
-
-/* ------------------------------------ route ---------------------------------- */
-
-async function RoutePage({ route }) {
-  const banners = [];
-  const cameras = [];
-  for (const slug of route.corridors) {
-    const corridor = getCorridor(slug);
-    const status = await getCorridorStatus(corridor);
-    banners.push({ corridor, status, sentence: statusSentence(corridor, status) });
-    cameras.push(...(await getCorridorCameras(corridor)));
-  }
-  return (
-    <main className="max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop py-8 space-y-8">
-      <JsonLd
-        data={[
-          webPageSchema({ name: route.name, description: route.intro, path: `/${route.slug}` }),
-          faqSchema(route.faqs),
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: route.name, path: `/${route.slug}` },
-          ]),
-        ]}
-      />
-      <section>
-        <div className="text-label-md font-bold tracking-widest text-primary uppercase mb-2">
-          {route.miles} miles, {route.driveTime}
-        </div>
-        <h1 className="text-xl font-black uppercase tracking-wide leading-snug">{route.name}</h1>
-      </section>
-
-      {banners.map(({ corridor, status, sentence }) => (
-        <StatusBanner key={corridor.slug} corridor={corridor} status={status} sentence={sentence} compact />
-      ))}
-
-      <section>
-        <h2 className="text-headline-sm font-bold text-primary mb-4">Cameras along this drive</h2>
-        <CameraGrid cameras={cameras} limit={cameras.length > 5 ? 3 : undefined} />
-        {cameras.length > 5 && (
-          <Link
-            href={route.corridors.length === 1 ? `/${route.corridors[0]}-cameras` : "/cameras"}
-            className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl btn-nav-dark text-sm font-bold uppercase tracking-wide active:scale-[0.98] transition-transform"
-          >
-            <span className="material-symbols-outlined text-[18px]">videocam</span>
-            SEE ALL WEBCAMS
-          </Link>
-        )}
-      </section>
-
-      <StormAlerts />
-
-      <p className="answer-first text-lg text-on-surface-variant leading-relaxed max-w-3xl">{route.intro}</p>
-
-      <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30">
-        <h2 className="text-title-lg font-bold text-primary mb-4">The drive, segment by segment</h2>
-        <div className="space-y-5">
-          {route.segments.map((s, i) => (
-            <div key={i}>
-              <h3 className="font-bold text-on-surface">{i + 1}. {s.heading}</h3>
-              <p className="text-on-surface-variant leading-relaxed mt-1">{s.body}</p>
+        <div className="mt-5 space-y-2">
+          {alerts.map((a, i) => (
+            <div key={i} className="rounded-2xl bg-error text-on-error px-4 py-3">
+              <p className="font-bold text-sm">{a.event}</p>
+              <p className="text-sm">{a.headline}</p>
             </div>
           ))}
         </div>
+      )}
+
+      <section className="mt-6 glass-card rounded-2xl p-4 md:p-5">
+        {today ? (
+          <>
+            <p className="answer-first text-body-lg text-on-surface font-semibold">
+              {town.name} right now: {today.shortForecast}, {today.temperature}°{today.temperatureUnit}.
+            </p>
+            <p className="text-sm text-secondary leading-relaxed mt-2">{today.detailedForecast}</p>
+          </>
+        ) : (
+          <p className="answer-first text-body-md text-secondary leading-relaxed">
+            The National Weather Service forecast for {town.name} is not loading right now. The corridor verdicts below
+            are the live part of this page; check weather.gov for the forecast until it returns.
+          </p>
+        )}
+        {weather?.hourly?.length > 0 && (
+          <div className="flex gap-2 overflow-x-auto hide-scrollbar mt-4">
+            {weather.hourly.map((h, i) => (
+              <div key={i} className="min-w-[76px] glass rounded-xl px-2 py-2 text-center">
+                <p className="text-[11px] font-bold text-secondary">{new Date(h.startTime).toLocaleTimeString("en-US", { hour: "numeric", timeZone: tz })}</p>
+                <p className="text-base font-extrabold text-on-surface">{h.temperature}°</p>
+                <p className="text-[11px] text-secondary leading-tight">{h.shortForecast}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
+      <div className="grid gap-4 mt-6">
+        {corridors.map((c, i) => (
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
+        ))}
+      </div>
+
+      <div className="mt-9 space-y-4 max-w-3xl">
+        {town.body.map((p, i) => (
+          <p key={i} className="text-sm md:text-base text-secondary leading-relaxed">{p}</p>
+        ))}
+        <p className="text-sm md:text-base text-secondary leading-relaxed"><strong className="text-on-surface">Getting around:</strong> {town.driveNote}</p>
+      </div>
+
+      {weather?.periods?.length > 1 && (
+        <section className="mt-9">
+          <h2 className="text-xl font-bold text-on-surface mb-3">The week ahead in {town.name}</h2>
+          <div className="glass-card rounded-2xl divide-y divide-outline-variant/20 overflow-hidden">
+            {weather.periods.slice(1, 9).map((p, i) => (
+              <div key={i} className="px-4 py-3 flex gap-4">
+                <p className="text-sm font-bold text-on-surface w-32 shrink-0">{p.name}</p>
+                <p className="text-sm text-secondary leading-relaxed"><strong className="text-on-surface">{p.temperature}°{p.temperatureUnit}</strong> : {p.shortForecast}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
+    </main>
+  );
+}
+
+async function RoutePage({ route }) {
+  const corridors = CORRIDORS.filter((c) => route.corridors.includes(c.slug));
+  const statuses = await Promise.all(corridors.map((c) => getCorridorStatus(statusCorridor(c))));
+  const camSets = await Promise.all(corridors.map((c) => getCorridorCameras(c)));
+  const cameras = corridors.flatMap((c, i) => camSets[i]).slice(0, 9);
+  return (
+    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
+      <JsonLd data={[
+        webPageSchema({ path: `/${route.slug}`, title: route.name, description: route.intro }),
+        faqSchema(route.slug === "las-vegas-to-los-angeles" ? [...route.faqs, ...STATELINE_FAQS] : route.faqs),
+      ]} />
+      <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{route.name}</h1>
+      <p className="text-sm text-secondary mt-2">{route.miles} miles | {route.driveTime} | {SITE.dataCreditShort}</p>
+      {route.slug === "las-vegas-to-los-angeles" && (
+        <div className="mt-6">
+          <StatelineBoard embedded />
+        </div>
+      )}
+      <div className="grid gap-4 mt-6">
+        {corridors.map((c, i) => (
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
+        ))}
+      </div>
+      {cameras.length > 0 && (
+        <section className="mt-9">
+          <h2 className="text-xl font-bold text-on-surface mb-3">Cameras along the way</h2>
+          <CameraGrid cameras={cameras.length > 5 ? cameras.slice(0, 3) : cameras} showCorridor />
+          {route.corridors.includes("cajon-pass") && (
+            <p className="mt-3 text-sm"><Link href="/cameras" className="font-bold text-primary">See all Cajon Pass cameras</Link></p>
+          )}
+        </section>
+      )}
+      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{route.intro}</p>
+      <div className="mt-10 space-y-9">
+        {route.segments.map((s) => (
+          <section key={s.heading}>
+            <h2 className="text-xl md:text-2xl font-bold text-on-surface mb-3">{s.heading}</h2>
+            <p className="text-sm md:text-base text-secondary leading-relaxed max-w-3xl">{s.body}</p>
+          </section>
+        ))}
+      </div>
       <FaqBlock faqs={route.faqs} />
     </main>
   );
 }
 
-/* ---------------------------------- compare ---------------------------------- */
-
 async function ComparePage({ compare }) {
-  const rows = [];
-  for (const slug of compare.corridorSlugs) {
-    const corridor = getCorridor(slug);
-    const status = await getCorridorStatus(corridor);
-    const cameras = await getCorridorCameras(corridor);
-    rows.push({ corridor, status, sentence: statusSentence(corridor, status), cameraCount: cameras.length });
-  }
-  const [a, b] = rows;
-  const table = [
-    ["Route", a.corridor.routeName, b.corridor.routeName],
-    ["Summit", `${a.corridor.summit.name}, ${a.corridor.summit.elevation.toLocaleString()} ft`, `${b.corridor.summit.name}, ${b.corridor.summit.elevation.toLocaleString()} ft`],
-    ["Verdict now", a.status.closed ? "CLOSED" : a.status.partialClosure ? "CLOSED ONE DIRECTION" : "OPEN", b.status.closed ? "CLOSED" : b.status.partialClosure ? "CLOSED ONE DIRECTION" : "OPEN"],
-    ["Chain control", a.status.chain.level > 0 ? `R${a.status.chain.level}` : "None posted", b.status.chain.level > 0 ? `R${b.status.chain.level}` : "None posted (no fixed checkpoints)"],
-    ["Summit temp", a.status.summitTempF != null ? `${a.status.summitTempF}°F` : "See forecast", b.status.summitTempF != null ? `${b.status.summitTempF}°F` : "See forecast"],
-    ["Signature hazard", "Snow and ice on a 6 percent interstate grade", "Wind on high profile vehicles, then snow"],
-    ["Cameras on this site", `${a.cameraCount}, bracketing the summit`, `${b.cameraCount}, ends only, none on the mountain`],
-    ["Detour role", "Detours via SR-14 and SR-58 (Tehachapi)", "Detours via SR-14 and I-5 (the Grapevine)"],
-  ];
+  const corridors = CORRIDORS.filter((c) => compare.corridorSlugs.includes(c.slug));
+  const statuses = await Promise.all(corridors.map((c) => getCorridorStatus(statusCorridor(c))));
+  const camCounts = await Promise.all(corridors.map((c) => getCorridorCameras(c)));
   return (
-    <main className="max-w-[1200px] mx-auto px-container-padding-mobile md:px-container-padding-desktop py-8 space-y-8">
-      <JsonLd
-        data={[
-          webPageSchema({ name: compare.title, description: compare.intro, path: `/${compare.slug}` }),
-          faqSchema(compare.faqs),
-          breadcrumbSchema([
-            { name: "Home", path: "/" },
-            { name: "Compare passes", path: "/compare" },
-            { name: compare.title, path: `/${compare.slug}` },
-          ]),
-        ]}
-      />
-      <section>
-        <div className="text-label-md font-bold tracking-widest text-primary uppercase mb-2">Live comparison</div>
-        <h1 className="text-xl font-black uppercase tracking-wide leading-snug">{compare.title}</h1>
-      </section>
-
-      {rows.map(({ corridor, status, sentence }) => (
-        <StatusBanner
-          key={corridor.slug}
-          corridor={corridor}
-          status={status}
-          sentence={sentence}
-          compact
-          href={`/${corridor.slug}`}
-        />
-      ))}
-
-      <section className="bg-surface-container-lowest rounded-xl p-6 md:p-8 shadow-sm border border-outline-variant/30 overflow-x-auto">
-        <h2 className="text-title-lg font-bold text-primary mb-4">Side by side</h2>
-        <table className="w-full text-sm md:text-base">
-          <thead>
-            <tr className="text-left border-b border-outline-variant/40">
-              <th className="py-2 pr-4 text-on-surface-variant font-semibold"> </th>
-              <th className="py-2 pr-4 font-bold text-on-surface">{a.corridor.name} ({a.corridor.routeLabel})</th>
-              <th className="py-2 font-bold text-on-surface">{b.corridor.name} ({b.corridor.routeLabel})</th>
-            </tr>
-          </thead>
-          <tbody>
-            {table.map((row, i) => (
-              <tr key={i} className="border-b border-outline-variant/20 last:border-0">
-                <td className="py-2.5 pr-4 font-semibold text-on-surface-variant whitespace-nowrap">{row[0]}</td>
-                <td className="py-2.5 pr-4 text-on-surface">{row[1]}</td>
-                <td className="py-2.5 text-on-surface">{row[2]}</td>
+    <main className="px-container-padding-mobile md:px-container-padding-desktop pb-20 md:pb-12">
+      <JsonLd data={[
+        webPageSchema({ path: `/${compare.slug}`, title: compare.title, description: compare.intro }),
+        faqSchema(compare.faqs),
+      ]} />
+      <h1 className="text-display-lg-mobile md:text-display-lg text-on-surface">{compare.title}</h1>
+      <div className="grid gap-4 mt-7">
+        {corridors.map((c, i) => (
+          <StatusBanner key={c.slug} corridor={c} status={statuses[i]} href={`/${c.slug}`} />
+        ))}
+      </div>
+      <section className="mt-9">
+        <h2 className="text-xl font-bold text-on-surface mb-3">Side by side</h2>
+        <div className="glass-card rounded-2xl overflow-x-auto">
+          <table className="w-full text-sm min-w-[560px]">
+            <thead>
+              <tr className="text-left text-secondary border-b border-outline-variant/30">
+                <th className="px-4 py-2 font-semibold">Stretch</th>
+                <th className="px-4 py-2 font-semibold">Road</th>
+                <th className="px-4 py-2 font-semibold">High point</th>
+                <th className="px-4 py-2 font-semibold">Cameras listed</th>
+                <th className="px-4 py-2 font-semibold">Character</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {corridors.map((c, i) => (
+                <tr key={c.slug} className="border-b border-outline-variant/10 last:border-0">
+                  <td className="px-4 py-2 font-bold text-on-surface"><Link href={`/${c.slug}`} className="text-primary">{c.name}</Link></td>
+                  <td className="px-4 py-2">{c.routeLabel}</td>
+                  <td className="px-4 py-2">{c.summit.name}, {c.summit.elevation.toLocaleString()} ft</td>
+                  <td className="px-4 py-2">{camCounts[i].reduce((n, cam) => n + cam.views.length, 0)}</td>
+                  <td className="px-4 py-2">{c.character}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
+      <p className="answer-first text-body-md text-secondary mt-3 max-w-3xl leading-relaxed">{compare.intro}</p>
 
-      <p className="answer-first text-lg text-on-surface-variant leading-relaxed max-w-3xl">{compare.intro}</p>
-
-      {compare.body.map((p, i) => (
-        <p key={i} className="text-lg text-on-surface-variant leading-relaxed max-w-3xl">{p}</p>
-      ))}
-
+      <div className="mt-9 space-y-4 max-w-3xl">
+        {compare.body.map((p, i) => (
+          <p key={i} className="text-sm md:text-base text-secondary leading-relaxed">{p}</p>
+        ))}
+      </div>
       <FaqBlock faqs={compare.faqs} />
     </main>
   );
+}
+
+export default async function SlugPage({ params }) {
+  const { slug } = await params;
+  const r = resolve(slug);
+  if (!r) notFound();
+  if (r.kind === "corridor") return <CorridorPage corridor={r.corridor} />;
+  if (r.kind === "town") return <TownPage town={r.town} />;
+  if (r.kind === "route") return <RoutePage route={r.route} />;
+  return <ComparePage compare={r.compare} />;
 }
